@@ -1,6 +1,6 @@
-workspace "Typhoon"
+workspace "GUIAPP"
 	architecture "x86_64"
-	startproject "Convection"
+	startproject "Client"
 
 	configurations 
 	{
@@ -13,61 +13,61 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"]  	  = "vendor/GLFW/include"
+IncludeDir["GLFW"]  	  = "vendor/glfw/include"
+IncludeDir["SDL2"]   	  = "vendor/SDL2/include"
 IncludeDir["ImGui"] 	  = "vendor/imgui"
 IncludeDir["stb_image"]   = "vendor/stb_image"
+IncludeDir["glm"]   	  = "vendor/glm"
 
 group "Dependencies"
-	include "Typhoon/vendor/GLFW"
-	include "Typhoon/vendor/imgui"
+	include "vendor/GLFW"
+	include "vendor/imgui"
 group ""
 
 group "Core"
-project "Typhoon"
-	location "Typhoon"
+project "Engine"
+	location "Engine"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "typhpch.h"
-	pchsource "Typhoon/src/typhpch.cpp"
-
 	files 
 	{
 		"%{prj.name}/src/**.h", 
 		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.h",
-		"%{prj.name}/vendor/stb_image/**.cpp",
-		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
+		"vendor/stb_image/stb_image.h",
 	}
 
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
 	}
 
 	includedirs 
 	{
-		"%{prj.name}/src", 
-		"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/src",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}",
+		"%{IncludeDir.SDL2}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}"
 	}
 
+	libdirs
+	{
+		"vendor/SDL2/lib/x64",
+	}
+
 	links
 	{
 		"GLFW",
-		"Glad",
 		"ImGui",
+		"SDL2.lib",
+		"SDL2main.lib",
 		"opengl32.lib"
 	}
 
@@ -90,12 +90,12 @@ project "Typhoon"
 		optimize "on"
 group ""
 
-group "Client"
-project "Sandbox"
-	location "Sandbox"
+group "APP"
+project "Client"
+	location "Client"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -109,15 +109,20 @@ project "Sandbox"
 
 	includedirs 
 	{
-		"Typhoon/vendor/spdlog/include", 
-		"Typhoon/src",
-		"Typhoon/vendor",
+		"Engine/src",
+		"vendor/SDL2/include",
+		"vendor/imgui",
 		"%{IncludeDir.glm}"
+	}
+
+	libdirs
+	{
+		"vendor/SDL2/lib/x64",
 	}
 
 	links 
 	{
-		"Typhoon"
+		"Engine"
 	}
 
 	filter "system:windows"

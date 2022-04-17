@@ -1,0 +1,12 @@
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = git@github.com:JBAMeijer/imgui.git
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = git@github.com:JBAMeijer/glfw.git
+[submodule "vendor/glm"]
+	path = vendor/glm
+	url = git@github.com:JBAMeijer/glm.git
+[submodule "vendor/SDL"]
+	path = vendor/SDL
+	url = git@github.com:libsdl-org/SDL.git
