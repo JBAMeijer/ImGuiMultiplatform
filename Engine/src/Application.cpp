@@ -1,33 +1,20 @@
 #include "Application.h"
-#include "GenericContext.h"
+#include "PlatformSpecific/SDLOpenGL/SDLOpenGL.h"
+#include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
+#include "PlatformSpecific/WIN32DX11/WIN32DX11.h"
 
-Application::Application(const ContextAPI& api, const ApplicationSpecification& applicationSpecification)
-{
-	m_context = GenericContext::Create(api, applicationSpecification);
-}
 
-Application::~Application()
+Application* Application::Create(const ContextAPI& api, const Application::Specification& spec)
 {
-	delete m_context;
-}
+	switch (api)
+	{
+	case ContextAPI::None: fprintf(stderr, "Unknown API!"); return nullptr;
+	case ContextAPI::SDLOpenGLES: return new SDLOpenGL(spec);
+	case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
+	case ContextAPI::WIN32DX11: return new WIN32DX11(spec);
+	}
 
-void Application::Run()
-{
-	m_context->Run();
-}
-
-void Application::PushLayer(const std::shared_ptr<Layer>& layer)
-{
-	m_context->PushLayer(layer);
-}
-
-void Application::Close()
-{
-	m_context->Close();
-}
-
-Application* Application::Create(const ContextAPI& api, const ApplicationSpecification& spec)
-{
-	return new Application(api, spec);
+	fprintf(stderr, "Unknown API!");
+	return nullptr;
 }
 

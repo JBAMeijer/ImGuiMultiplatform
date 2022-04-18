@@ -15,15 +15,23 @@ public:
 
 Application* CreateApplication(int argc, char** argv)
 {
-	ApplicationSpecification spec;
+	Application::Specification spec;
 	spec.Name = "Test";
 	spec.Width = 800;
 	spec.Height = 400;
-
-	ContextAPI API = ContextAPI::SDLOpenGLES;
-	Application* app = new Application(API, spec);
-	std::shared_ptr<AppLayer> appLayer = std::make_shared<AppLayer>();
-	app->PushLayer(appLayer);
-
+	Application::ContextAPI API = Application::ContextAPI::WIN32DX11;
+	Application* app = Application::Create(API, spec);
+	app->PushLayer<AppLayer>();
+	app->SetMenubarCallback([app]()
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Exit"))
+			{
+				app->Close();
+			}
+			ImGui::EndMenu();
+		}
+	});
 	return app;
 }

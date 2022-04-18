@@ -11,13 +11,22 @@ workspace "GUIAPP"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+SDL2_SDK = os.getenv("SDL2_SDK")
+
+
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"]  	  = "vendor/glfw/include"
-IncludeDir["SDL2"]   	  = "vendor/SDL2/include"
 IncludeDir["ImGui"] 	  = "vendor/imgui"
 IncludeDir["stb_image"]   = "vendor/stb_image"
 IncludeDir["glm"]   	  = "vendor/glm"
+IncludeDir["SDL2SDK"]     = "%{SDL2_SDK}/include"
+IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/Include"
+
+LibraryDir = {}
+LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/Lib/x64"
+LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 
 group "Dependencies"
 	include "vendor/GLFW"
@@ -51,15 +60,17 @@ project "Engine"
 	{
 		"%{prj.name}/src",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.SDL2}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.SDL2SDK}",
+		"%{IncludeDir.VulkanSDK}"
 	}
 
 	libdirs
 	{
-		"vendor/SDL2/lib/x64",
+		"%{LibraryDir.SDL2SDKx64}",
+		"%{LibraryDir.VulkanSDK}"
 	}
 
 	links
@@ -68,7 +79,9 @@ project "Engine"
 		"ImGui",
 		"SDL2.lib",
 		"SDL2main.lib",
-		"opengl32.lib"
+		"opengl32.lib",
+		"vulkan-1.lib",
+		"D3D11.lib"
 	}
 
 	filter "system:windows"
@@ -110,14 +123,9 @@ project "Client"
 	includedirs 
 	{
 		"Engine/src",
-		"vendor/SDL2/include",
 		"vendor/imgui",
+		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.glm}"
-	}
-
-	libdirs
-	{
-		"vendor/SDL2/lib/x64",
 	}
 
 	links 

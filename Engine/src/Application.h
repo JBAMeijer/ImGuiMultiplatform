@@ -5,39 +5,53 @@
 
 #include "Layer.h"
 
-struct ApplicationSpecification
-{
-	std::string Name = "ImGuiApp";
-	uint32_t Width = 400;
-	uint32_t Height = 200;
-};
-
-enum class ContextAPI
-{
-	SDLOpenGLES = 0,
-	GLFWVulkan
-};
-
-class GenericContext;
-
 class Application
 {
 public:
-	Application(const ContextAPI& api, const ApplicationSpecification& applicationSpecification);
+	enum class ContextAPI
+	{
+		None = 0,
+		SDLOpenGLES,
+		GLFWVulkan,
+		WIN32DX11
+	};
+
+	struct Specification
+	{
+		std::string Name = "App";
+		uint32_t Width = 400;
+		uint32_t Height = 200;
+	};
+
+public:
+	Application(const Specification& applicationSpecification) : m_Specification(applicationSpecification) {}
 	
-	~Application();
+	virtual ~Application() = default;
+	virtual void Run() = 0;
+	virtual void SetMenubarCallback(const std::function<void()>& menubarCallback) { m_MenubarCallback = menubarCallback; };
 
-	void Run();
-		//virtual void SetMenubarCallback(const std::function<void()>& menubarCallback) = 0;
+	virtual void Close() { m_Running = false; }
+	
+	template<typename T>
+	void PushLayer()
+	{
+		static_assert(std::is_base_of<Layer, T>::value, "Pushed type is not subclass of Layer!");
+		m_LayerStack.emplace_back(std::make_shared<T>())->OnAttach();
+	}
+	void PushLayer(const std::shared_ptr<Layer>& layer)
+	{
+		m_LayerStack.emplace_back(layer); 
+		layer->OnAttach();
+	}
 
-	void PushLayer(const std::shared_ptr<Layer>& layer);
+	static Application* Create(const ContextAPI&, const Specification&);
 
-	void Close();
+protected:
+	bool m_Running = false;
+	const Specification& m_Specification;
+	std::vector<std::shared_ptr<Layer>> m_LayerStack;
 
-	static Application* Create(const ContextAPI&, const ApplicationSpecification&);
-
-private:
-	GenericContext* m_context;
+	std::function<void()> m_MenubarCallback;
 };
 
 Application* CreateApplication(int argc, char** argv);
