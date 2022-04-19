@@ -1,6 +1,13 @@
 .vs/
 
-bin-int/
-bin/
-*.sln
-*.vcxproj.*
+**/bin-int/
+**/bin/
+
+!vendor/bin/premake/
+
+# Visual studio files and folders
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user

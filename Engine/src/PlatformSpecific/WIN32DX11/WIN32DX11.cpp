@@ -41,7 +41,7 @@ void WIN32DX11::Run()
 {
 	m_Running = true;
 
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
 	ImGuiIO& io = ImGui::GetIO();
 
 	while (m_Running)
@@ -56,6 +56,8 @@ void WIN32DX11::Run()
 			if (msg.message == WM_QUIT)
 				Close();
 		}
+		if (!m_Running)
+			break;
 
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -78,7 +80,7 @@ void WIN32DX11::Run()
 
 		ImGui::Render();
 		const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-		g_pd3dDeviceContext->OMGetRenderTargets(1, &g_mainRenderTargetView, NULL);
+		g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
 		g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -117,8 +119,7 @@ void WIN32DX11::Init()
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -136,8 +137,8 @@ void WIN32DX11::Init()
 	ImGuiStyle& style = ImGui::GetStyle();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
-		style.WindowRounding = 0.f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.f;
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
 
 	// Setup Platform/Renderer backends
