@@ -2,11 +2,11 @@
 #include "Application.h"
 #include <windows.h>
 
-class WIN32DX11 : public Application
+class WIN32DX12 : public Application
 {
 public:
-	WIN32DX11(const Application::Specification specification);
-	~WIN32DX11();
+	WIN32DX12(const Application::Specification& specification);
+	virtual ~WIN32DX12();
 
 	void Run() override;
 

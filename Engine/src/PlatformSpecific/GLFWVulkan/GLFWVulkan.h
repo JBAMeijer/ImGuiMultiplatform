@@ -7,7 +7,7 @@ class GLFWVulkan : public Application
 {
 public:
 	GLFWVulkan(const Application::Specification Specification);
-	~GLFWVulkan();
+	virtual ~GLFWVulkan();
 
 	virtual void Run() override;
 

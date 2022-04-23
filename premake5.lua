@@ -81,7 +81,10 @@ project "Engine"
 		"SDL2main.lib",
 		"opengl32.lib",
 		"vulkan-1.lib",
-		"D3D11.lib"
+		"d3d11.lib",
+		"d3d12.lib",
+		"d3dcompiler.lib",
+		"dxgi.lib"
 	}
 
 	filter "system:windows"

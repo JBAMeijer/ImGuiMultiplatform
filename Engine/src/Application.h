@@ -11,9 +11,9 @@ public:
 	enum class ContextAPI
 	{
 		None = 0,
-		SDLOpenGLES,
+		SDLOpenGL,
 		GLFWVulkan,
-		WIN32DX11
+		WIN32DX12
 	};
 
 	struct Specification
@@ -44,7 +44,18 @@ public:
 		layer->OnAttach();
 	}
 
+	void PopLayer(const std::shared_ptr<Layer>& layer)
+	{
+		auto it = std::find(m_LayerStack.begin(), m_LayerStack.end(), layer);
+		if (it != m_LayerStack.end())
+			m_LayerStack.erase(it);
+	}
+
 	static Application* Create(const ContextAPI&, const Specification&);
+
+private:
+	virtual void Init() = 0;
+	virtual void Shutdown() = 0;
 
 protected:
 	bool m_Running = false;

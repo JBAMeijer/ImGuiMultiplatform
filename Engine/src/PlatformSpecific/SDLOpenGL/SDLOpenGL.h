@@ -8,7 +8,7 @@ class SDLOpenGL : public Application
 {
 public:
 	SDLOpenGL(const Application::Specification& applicationSpecification);
-	~SDLOpenGL();
+	virtual ~SDLOpenGL();
 
 	virtual void Run() override;
 
