@@ -12,7 +12,7 @@ workspace "GUIAPP"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-SDL2_SDK = os.getenv("SDL2_SDK")
+SDL2_SDK   = os.getenv("SDL2_SDK")
 
 
 -- Include directories relative to root folder (solution directory)
@@ -26,7 +26,7 @@ IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
 LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/Lib/x64"
-LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
+LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/Lib"
 
 group "Dependencies"
 	include "vendor/GLFW"
@@ -77,18 +77,26 @@ project "Engine"
 	{
 		"GLFW",
 		"ImGui",
-		"SDL2.lib",
-		"SDL2main.lib",
-		"opengl32.lib",
-		"vulkan-1.lib",
-		"d3d11.lib",
-		"d3d12.lib",
-		"d3dcompiler.lib",
-		"dxgi.lib"
 	}
 
 	filter "system:windows"
+		defines { "SYSTEM_WINDOWS" }
+
+		links
+		{
+			"SDL2.lib",
+			"SDL2main.lib",
+			"opengl32.lib",
+			"vulkan-1.lib",
+			"d3d12.lib",
+			"d3dcompiler.lib",
+			"dxgi.lib"
+		}
+
 		systemversion "latest"
+
+	filter "system:linux"
+		defines { "SYSTEM_LINUX" }
 
 	filter "configurations:Debug"
 		defines "TYPH_DEBUG"
