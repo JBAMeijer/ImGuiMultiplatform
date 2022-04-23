@@ -14,7 +14,6 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 SDL2_SDK   = os.getenv("SDL2_SDK")
 
-
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"]  	  = "vendor/glfw/include"
@@ -99,17 +98,17 @@ project "Engine"
 		defines { "SYSTEM_LINUX" }
 
 	filter "configurations:Debug"
-		defines "TYPH_DEBUG"
+		defines "CF_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "TYPH_RELEASE"
+		defines "CF_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "TYPH_DIST"
+		defines "CF_DIST"
 		runtime "Release"
 		optimize "on"
 group ""
@@ -148,17 +147,17 @@ project "Client"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "TYPH_DEBUG"
+		defines "CF_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "TYPH_RELEASE"
+		defines "CF_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "TYPH_DIST"
+		defines "CF_DIST"
 		runtime "Release"
 		optimize "on"
 group ""
