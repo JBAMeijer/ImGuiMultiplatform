@@ -13,7 +13,9 @@ public:
 		None = 0,
 		SDLOpenGL,
 		GLFWVulkan,
-		WIN32DX12
+#if defined(SYSTEM_WINDOWS)
+		WIN32DX12,
+#endif
 	};
 
 	struct Specification

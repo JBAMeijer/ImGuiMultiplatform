@@ -21,14 +21,14 @@ IncludeDir["ImGui"] 	  = "vendor/imgui"
 IncludeDir["stb_image"]   = "vendor/stb_image"
 IncludeDir["glm"]   	  = "vendor/glm"
 IncludeDir["SDL2SDK"]     = "%{SDL2_SDK}/include"
-IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/Include"
+IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/include"
 
 LibraryDir = {}
-LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/Lib/x64"
-LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/Lib"
+LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/lib/x64"
+LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 
 group "Dependencies"
-	include "vendor/GLFW"
+	include "vendor/glfw"
 	include "vendor/imgui"
 group ""
 
@@ -50,11 +50,6 @@ project "Engine"
 		"vendor/stb_image/stb_image.h",
 	}
 
-	defines
-	{
-		"_CRT_SECURE_NO_WARNINGS",
-	}
-
 	includedirs 
 	{
 		"%{prj.name}/src",
@@ -72,17 +67,17 @@ project "Engine"
 		"%{LibraryDir.VulkanSDK}"
 	}
 
-	links
-	{
-		"GLFW",
-		"ImGui",
-	}
-
 	filter "system:windows"
-		defines { "SYSTEM_WINDOWS" }
+		defines 
+		{ 
+			"SYSTEM_WINDOWS",
+			"_CRT_SECURE_NO_WARNINGS"
+		}
 
 		links
 		{
+			"GLFW",
+			"ImGui",
 			"SDL2.lib",
 			"SDL2main.lib",
 			"opengl32.lib",
@@ -95,8 +90,15 @@ project "Engine"
 		systemversion "latest"
 
 	filter "system:linux"
-		defines { "SYSTEM_LINUX" }
+		removefiles { "**/WIN32DX12/**" }
 
+		defines 
+		{ 
+			"SYSTEM_LINUX"
+		}
+
+		systemversion "latest"
+	
 	filter "configurations:Debug"
 		defines "CF_DEBUG"
 		runtime "Debug"
@@ -140,10 +142,29 @@ project "Client"
 
 	links 
 	{
-		"Engine"
+		"Engine",
 	}
 
 	filter "system:windows"
+		systemversion "latest"
+	
+	filter { "system:linux", "action:gmake2" }
+
+		libdirs
+		{
+			"%{LibraryDir.VulkanSDK}"
+		}
+
+		links 
+		{
+			"GLFW",
+			"GL",
+			"ImGui",
+			"SDL2",
+			"vulkan"
+			
+		}
+
 		systemversion "latest"
 
 	filter "configurations:Debug"

@@ -7,7 +7,11 @@
 
 # Visual studio files and folders
 .vs/
+.vscode/
 **.sln
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+
+# gmake2
+Makefile

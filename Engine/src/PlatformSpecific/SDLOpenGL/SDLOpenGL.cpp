@@ -1,15 +1,19 @@
 #include "SDLOpenGL.h"
+#include "Application.h"
+
 #include "imgui.h"
 
 //#define IMGUI_IMPL_OPENGL_ES2
 #define SDL_MAIN_HANDLED
-#include <Backends/imgui_impl_sdl.h>
-#include <Backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_opengl3.h>
 
-#include <SDL.h>
-#include <SDL_opengles2.h>
-
-#include "Application.h"
+#include <SDL2/SDL.h>
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+#include <SDL2/SDL_opengles2.h>
+#else
+#include <SDL2/SDL_opengl.h>
+#endif
 
 // fonts
 #include "ImGui/Fonts/Roboto-Regular.embed"
