@@ -40,13 +40,13 @@ public:
 		static_assert(std::is_base_of<Layer, T>::value, "Pushed type is not subclass of Layer!");
 		m_LayerStack.emplace_back(std::make_shared<T>())->OnAttach();
 	}
-	void PushLayer(const std::shared_ptr<Layer>& layer)
+	virtual void PushLayer(const std::shared_ptr<Layer>& layer)
 	{
 		m_LayerStack.emplace_back(layer); 
 		layer->OnAttach();
 	}
 
-	void PopLayer(const std::shared_ptr<Layer>& layer)
+	virtual void PopLayer(const std::shared_ptr<Layer>& layer)
 	{
 		auto it = std::find(m_LayerStack.begin(), m_LayerStack.end(), layer);
 		if (it != m_LayerStack.end())
@@ -55,11 +55,15 @@ public:
 
 	static Application* Create(const ContextAPI&, const Specification&);
 
+protected:
+	virtual void RenderLayers();
+
 private:
 	virtual void Init() = 0;
 	virtual void Shutdown() = 0;
 
 protected:
+	bool m_renderingAllowed = true;
 	bool m_Running = false;
 	const Specification& m_Specification;
 	std::vector<std::shared_ptr<Layer>> m_LayerStack;

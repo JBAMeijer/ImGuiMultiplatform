@@ -1,0 +1,50 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "make build task",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "config=${input:Buildconfig}",
+                "${input:Buildtarget}",
+                "-j4"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "Buildconfig",
+            "type": "pickString",
+            "description": "Choose build configuration!",
+            "options": [
+                "debug",
+                "release",
+                "dist"
+            ],
+            "default": "debug"
+        },
+        {
+            "id": "Buildtarget",
+            "type": "pickString",
+            "description": "Choose target configuration!",
+            "options": [
+                "all",
+                "clean"
+            ],
+            "default": "all"
+        }
+    ]
+}

@@ -5,9 +5,12 @@
 
 !/vendor/bin/premake/
 
+
 # Visual studio files and folders
 .vs/
 .vscode/
+
+null.d
 **.sln
 **.vcxproj
 **.vcxproj.filters

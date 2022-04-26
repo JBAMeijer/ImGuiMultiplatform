@@ -4,6 +4,8 @@
 #include <backends/imgui_impl_vulkan.h>
 #include <cstdio>
 #include <cstdlib>
+#include <thread>
+
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -387,20 +389,11 @@ void GLFWVulkan::Run()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// enable docking
-		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_None);
+		if(m_renderingAllowed)
+			RenderLayers();
+		else
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		if (m_MenubarCallback)
-		{
-			if (ImGui::BeginMainMenuBar())
-			{
-				m_MenubarCallback();
-				ImGui::EndMainMenuBar();
-			}
-		}
-
-		for (auto& layer : m_LayerStack)
-			layer->OnUIRender();
 
 		// Rendering
 		ImGui::Render();
@@ -537,6 +530,22 @@ void GLFWVulkan::Init()
 		check_vk_result(err);
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
+
+	static bool& allowed = m_renderingAllowed;
+
+	glfwSetWindowIconifyCallback(m_WindowHandle, [](GLFWwindow* window, int iconified) {
+		if(iconified)
+		{
+			printf("Window iconified!\n");
+			allowed = false;
+		}
+		else
+		{
+			printf("Window restored!\n");
+			allowed = true;
+		}
+
+	});
 }
 
 void GLFWVulkan::Shutdown()

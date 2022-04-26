@@ -1,4 +1,6 @@
 #include "Application.h"
+#include "imgui.h"
+
 #include "PlatformSpecific/None/None.h"
 #include "PlatformSpecific/SDLOpenGL/SDLOpenGL.h"
 #include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
@@ -22,3 +24,20 @@ Application* Application::Create(const ContextAPI& api, const Application::Speci
 	return nullptr;
 }
 
+void Application::RenderLayers()
+{
+	// enable docking
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_None);
+
+	if (m_MenubarCallback)
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			m_MenubarCallback();
+			ImGui::EndMainMenuBar();
+		}
+	}
+
+	for (auto& layer : m_LayerStack)
+		layer->OnUIRender();
+}
