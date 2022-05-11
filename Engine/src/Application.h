@@ -31,6 +31,7 @@ public:
 	virtual ~Application() = default;
 	virtual void Run() = 0;
 	virtual void SetMenubarCallback(const std::function<void()>& menubarCallback) { m_MenubarCallback = menubarCallback; };
+	virtual void SetMainloopCallback(const std::function<void()>& mainloopCallback) { m_MainloopCallback = mainloopCallback; };
 
 	virtual void Close() { m_Running = false; }
 	
@@ -68,6 +69,9 @@ protected:
 	const Specification& m_Specification;
 	std::vector<std::shared_ptr<Layer>> m_LayerStack;
 
+	std::function<void()> m_MainloopCallback;
+
+private:
 	std::function<void()> m_MenubarCallback;
 };
 

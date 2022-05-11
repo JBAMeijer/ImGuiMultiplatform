@@ -384,15 +384,17 @@ void GLFWVulkan::Run()
 			}
 		}
 
+		m_MainloopCallback();
+
 		// Start the Dear ImGui frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		if(m_renderingAllowed)
+		//if(m_renderingAllowed)
 			RenderLayers();
-		else
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+		//else
+		//	std::this_thread::sleep_for(std::chrono::seconds(1));
 
 
 		// Rendering

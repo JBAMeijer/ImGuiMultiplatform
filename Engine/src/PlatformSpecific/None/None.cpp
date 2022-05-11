@@ -32,20 +32,7 @@ void None::Run()
 
 		ImGui::NewFrame();
 
-		// enable docking
-		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_None);
-
-		if (m_MenubarCallback)
-		{
-			if (ImGui::BeginMainMenuBar())
-			{
-				m_MenubarCallback();
-				ImGui::EndMainMenuBar();
-			}
-		}
-
-		for (auto& layer : m_LayerStack)
-			layer->OnUIRender();
+		RenderLayers();
 
 		ImGui::Render();
 	}
