@@ -70,7 +70,6 @@ project "Engine"
 	filter "system:windows"
 		defines 
 		{ 
-			"SYSTEM_WINDOWS",
 			"_CRT_SECURE_NO_WARNINGS"
 		}
 
@@ -91,12 +90,6 @@ project "Engine"
 
 	filter "system:linux"
 		removefiles { "**/WIN32DX12/**" }
-
-		defines 
-		{ 
-			"SYSTEM_LINUX"
-		}
-
 		systemversion "latest"
 	
 	filter "configurations:Debug"

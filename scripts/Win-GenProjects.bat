@@ -19,17 +19,17 @@ if not defined a goto :aPrompt
 
 if %a%==1 (
 	pushd %~dp0\..\
-	call vendor\bin\premake\premake5.exe vs2022
+	call vendor\bin\premake\Windows\premake5.exe vs2022
 	popd
 )
 if %a%==2 (
 	pushd %~dp0\..\
-	call vendor\bin\premake\premake5.exe vs2019
+	call vendor\bin\premake\Windows\premake5.exe vs2019
 	popd
 )
 if %a%==3 (
 	pushd %~dp0\..\
-	call vendor\bin\premake\premake5.exe vs2017
+	call vendor\bin\premake\Windows\premake5.exe vs2017
 	popd
 )
 PAUSE

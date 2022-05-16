@@ -1,9 +1,12 @@
 #pragma once
+#include <Base.h>
+
 #include <string>
 #include <functional>
 #include <memory>
 
 #include "Layer.h"
+
 
 class Application
 {
@@ -13,7 +16,7 @@ public:
 		None = 0,
 		SDLOpenGL,
 		GLFWVulkan,
-#if defined(SYSTEM_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 		WIN32DX12,
 #endif
 	};
