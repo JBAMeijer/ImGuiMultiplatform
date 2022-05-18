@@ -13,11 +13,13 @@ https://vulkan.lunarg.com/sdk/home#linux\
 Follow instructions from:\
 https://vulkan.lunarg.com/doc/sdk/1.3.211.0/linux/getting_started.html
 ### SDL2
-Incomplete
+`sudo apt install libsdl2-dev`
 ## Linux - Fedora
 ### OpenGL
 `sudo dnf install mesa-libGL-devel`
 ### glfw
 Incomplete
 ### Vulkan
-Same as ubuntu 
+Same as ubuntu
+### SDL2
+Incomplete
