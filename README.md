@@ -5,6 +5,7 @@
 # Setup
 ## Linux - ubuntu 22.04
 ### glfw
+Glfw is included in this project.
 Requires x11 dependencies to work.\
 `sudo apt install xorg-dev`
 ### Vulkan
@@ -18,7 +19,7 @@ https://vulkan.lunarg.com/doc/sdk/1.3.211.0/linux/getting_started.html
 ### OpenGL
 `sudo dnf install mesa-libGL-devel`
 ### glfw
-Incomplete
+Glfw is included in this project.
 ### Vulkan
 Same as ubuntu
 ### SDL2

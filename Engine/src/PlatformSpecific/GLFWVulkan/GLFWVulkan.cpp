@@ -1,7 +1,9 @@
 #include "GLFWVulkan.h"
 
+#include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
@@ -552,12 +554,8 @@ void GLFWVulkan::Init()
 
 void GLFWVulkan::Shutdown()
 {
-	for (auto& layer : m_LayerStack)
-		layer->OnDetach();
-
-	m_LayerStack.clear();
-
 	// Cleanup
+	DestroyLayers();
 	VkResult err = vkDeviceWaitIdle(g_Device);
 	check_vk_result(err);
 	ImGui_ImplVulkan_Shutdown();

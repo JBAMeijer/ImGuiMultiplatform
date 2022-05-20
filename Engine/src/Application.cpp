@@ -3,6 +3,7 @@
 
 #include "PlatformSpecific/None/None.h"
 #include "PlatformSpecific/SDLOpenGL/SDLOpenGL.h"
+#include "PlatformSpecific/GLFWOpenGL/GLFWOpenGL.h"
 #include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
 #if defined(PLATFORM_WINDOWS)
 #include "PlatformSpecific/WIN32DX12/WIN32DX12.h"
@@ -14,6 +15,7 @@ Application* Application::Create(const ContextAPI& api, const Application::Speci
 	{
 	case ContextAPI::None: return new None(spec);
 	case ContextAPI::SDLOpenGL: return new SDLOpenGL(spec);
+	case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
 	case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
 #if defined(PLATFORM_WINDOWS)
 	case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
@@ -40,4 +42,12 @@ void Application::RenderLayers()
 
 	for (auto& layer : m_LayerStack)
 		layer->OnUIRender();
+}
+
+void Application::DestroyLayers()
+{
+	for(auto& layer : m_LayerStack)
+    	layer->OnDetach();
+
+    m_LayerStack.clear();
 }

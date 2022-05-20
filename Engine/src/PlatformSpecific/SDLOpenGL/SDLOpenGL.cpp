@@ -177,12 +177,8 @@ void SDLOpenGL::Init()
 
 void SDLOpenGL::Shutdown()
 {
-	for (auto& layer : m_LayerStack)
-		layer->OnDetach();
-
-	m_LayerStack.clear();
-
 	// Cleanup
+	DestroyLayers();
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();

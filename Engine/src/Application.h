@@ -15,6 +15,7 @@ public:
 	{
 		None = 0,
 		SDLOpenGL,
+		GLFWOpenGL,
 		GLFWVulkan,
 #if defined(PLATFORM_WINDOWS)
 		WIN32DX12,
@@ -62,6 +63,8 @@ public:
 protected:
 	virtual void RenderLayers();
 
+	void DestroyLayers();
+
 private:
 	virtual void Init() = 0;
 	virtual void Shutdown() = 0;
@@ -70,11 +73,10 @@ protected:
 	bool m_renderingAllowed = true;
 	bool m_Running = false;
 	const Specification& m_Specification;
-	std::vector<std::shared_ptr<Layer>> m_LayerStack;
-
 	std::function<void()> m_MainloopCallback;
 
 private:
+	std::vector<std::shared_ptr<Layer>> m_LayerStack;
 	std::function<void()> m_MenubarCallback;
 };
 

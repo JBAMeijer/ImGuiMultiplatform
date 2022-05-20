@@ -14,7 +14,7 @@ Application* CreateApplication(int argc, char** argv)
 	spec.Name = "Test";
 	spec.Width = 800;
 	spec.Height = 400;
-	Application::ContextAPI API = Application::ContextAPI::GLFWVulkan;
+	Application::ContextAPI API = Application::ContextAPI::GLFWOpenGL;
 	Application* app = Application::Create(API, spec);
 
 	std::shared_ptr<AppLayer> appLayer = std::make_shared<AppLayer>(app);

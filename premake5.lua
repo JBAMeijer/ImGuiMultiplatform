@@ -150,12 +150,13 @@ project "Client"
 
 		links 
 		{
-			"GLFW",
+			"dl",
+			"pthread",
 			"GL",
+			"GLFW",
 			"ImGui",
 			"SDL2",
 			"vulkan"
-			
 		}
 
 		systemversion "latest"

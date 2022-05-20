@@ -204,12 +204,8 @@ void WIN32DX12::Init()
 
 void WIN32DX12::Shutdown()
 {
-	for (auto& layer : m_LayerStack)
-		layer->OnDetach();
-
-	m_LayerStack.clear();
-
 	// Cleanup
+	DestroyLayers();
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();

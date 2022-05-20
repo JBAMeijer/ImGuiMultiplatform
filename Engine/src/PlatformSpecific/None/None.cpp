@@ -60,10 +60,7 @@ void None::Init()
 
 void None::Shutdown()
 {
-	for (auto& layer : m_LayerStack)
-		layer->OnDetach();
-
-	m_LayerStack.clear();
+	DestroyLayers();
 
 	ImGui::DestroyContext();
 
