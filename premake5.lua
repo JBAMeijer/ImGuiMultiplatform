@@ -61,6 +61,13 @@ project "Engine"
 		"%{IncludeDir.VulkanSDK}"
 	}
 
+	if not VULKAN_SDK then
+		print("YES")
+		removeincludedirs "%{IncludeDir.VulkanSDK}"
+		removefiles { "**/GLFWVulkan/**" }
+		defines "REMOVE_VULKAN"
+	end
+
 	libdirs
 	{
 		"%{LibraryDir.SDL2SDKx64}",
