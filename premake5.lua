@@ -61,18 +61,25 @@ project "Engine"
 		"%{IncludeDir.VulkanSDK}"
 	}
 
-	if not VULKAN_SDK then
-		print("YES")
-		removeincludedirs "%{IncludeDir.VulkanSDK}"
-		removefiles { "**/GLFWVulkan/**" }
-		defines "REMOVE_VULKAN"
-	end
-
 	libdirs
 	{
 		"%{LibraryDir.SDL2SDKx64}",
 		"%{LibraryDir.VulkanSDK}"
 	}
+
+	if not VULKAN_SDK then
+		removeincludedirs "%{IncludeDir.VulkanSDK}"
+		removelibdirs "%{LibraryDir.VulkanSDK}"
+		removefiles { "**/GLFWVulkan/**" }
+		defines "REMOVE_VULKAN"
+	end
+
+	if not SDL2_SDK then
+		removeincludedirs "%{IncludeDir.SDL2SDK}"
+		removelibdirs "%{LibraryDir.SDL2SDKx64}"
+		removefiles { "**/SDLOpenGL/**" }
+		defines "REMOVE_SDL"
+	end
 
 	filter "system:windows"
 		defines 
@@ -92,6 +99,14 @@ project "Engine"
 			"d3dcompiler.lib",
 			"dxgi.lib"
 		}
+
+		if not VULKAN_SDK then
+			removelinks "vulkan-1.lib"
+		end
+
+		if not SDL2_SDK then
+			removelinks { "SDL2.lib", "SDL2main.lib" }
+		end
 
 		systemversion "latest"
 

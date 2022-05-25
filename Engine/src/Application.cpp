@@ -2,9 +2,13 @@
 #include "imgui.h"
 
 #include "PlatformSpecific/None/None.h"
+#if !defined(REMOVE_SDL)
 #include "PlatformSpecific/SDLOpenGL/SDLOpenGL.h"
+#endif
 #include "PlatformSpecific/GLFWOpenGL/GLFWOpenGL.h"
+#if !defined(REMOVE_VULKAN)
 #include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
+#endif
 #if defined(PLATFORM_WINDOWS)
 #include "PlatformSpecific/WIN32DX12/WIN32DX12.h"
 #endif
@@ -14,9 +18,13 @@ Application* Application::Create(const ContextAPI& api, const Application::Speci
 	switch (api)
 	{
 	case ContextAPI::None: return new None(spec);
+#if !defined(REMOVE_SDL)
 	case ContextAPI::SDLOpenGL: return new SDLOpenGL(spec);
+#endif
 	case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
+#if !defined(REMOVE_VULKAN)
 	case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
+#endif
 #if defined(PLATFORM_WINDOWS)
 	case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
 #endif

@@ -14,9 +14,13 @@ public:
 	enum class ContextAPI
 	{
 		None = 0,
+#if !defined(REMOVE_SDL)
 		SDLOpenGL,
+#endif
 		GLFWOpenGL,
+#if !defined(REMOVE_VULKAN)
 		GLFWVulkan,
+#endif
 #if defined(PLATFORM_WINDOWS)
 		WIN32DX12,
 #endif

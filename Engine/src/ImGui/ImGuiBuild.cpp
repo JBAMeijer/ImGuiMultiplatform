@@ -1,5 +1,5 @@
-// Renderers
 #include <Base.h>
+// Renderers
 
 #include <backends/imgui_impl_opengl3.cpp>
 #if !defined(REMOVE_VULKAN)
@@ -10,7 +10,9 @@
 #endif
 
 // Platforms
+#if !defined(REMOVE_SDL)
 #include <backends/imgui_impl_sdl.cpp>
+#endif
 #include <backends/imgui_impl_glfw.cpp>
 #if defined(PLATFORM_WINDOWS)
 #include <backends/imgui_impl_win32.cpp>
