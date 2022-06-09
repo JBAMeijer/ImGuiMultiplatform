@@ -56,10 +56,7 @@ void GLFWOpenGL::Run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        //if(m_renderingAllowed)
-			RenderLayers();
-		//else
-		//	std::this_thread::sleep_for(std::chrono::seconds(1));
+		RenderLayers();
 
         // Rendering
         ImGui::Render();

@@ -1,49 +1,37 @@
-class WindowLayer : public Layer
-{
-public:
 
-	virtual void OnUIRender() override
-	{
-		ImGui::Begin("Second Window");
-		ImGui::Button("Button");
-		ImGui::End();
-	}
-};
 
 class AppLayer : public Layer
 {
 public:
-	AppLayer(Application* app = nullptr) : m_app(app) {
-		m_previous_load_new_window = false;
-		m_load_new_window = false;
-
-		m_WindowLayer = std::make_shared<WindowLayer>();
+	AppLayer() {
 	}
 
 	virtual void OnUIRender() override
 	{
-		ImGui::Begin("Hello");
-		ImGui::Button("Button");
-		if (m_app != nullptr)
+		//ImGui::ShowDemoWindow();
+
+		ImGui::Begin("Treeview");
+		
+		if (ImGui::TreeNode("SmartFlo Devices"))
 		{
-			ImGui::Checkbox("Load new imgui window", &m_load_new_window);
-
-			if (m_load_new_window != m_previous_load_new_window)
+			for (int i = 0; i < 4; i++)
 			{
-				if (m_load_new_window == true)
-					m_app->PushLayer(m_WindowLayer);
-				else if (m_load_new_window == false)
-					m_app->PopLayer(m_WindowLayer);
+				static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-				m_previous_load_new_window = m_load_new_window;
+				ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Smartflo %d", i);
+
 			}
+			ImGui::TreePop();
 		}
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+		ImGui::End();
+
+		ImGui::Begin("Sideview");
+
+		ImGui::End();
+
+		ImGui::Begin("Console");
+
 		ImGui::End();
 	}
-
-	Application* m_app;
-	std::shared_ptr<WindowLayer> m_WindowLayer;
-	bool m_load_new_window;
-	bool m_previous_load_new_window;
 };

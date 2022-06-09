@@ -12,13 +12,12 @@ Application* CreateApplication(int argc, char** argv)
 {
 	Application::Specification spec;
 	spec.Name = "Test";
-	spec.Width = 800;
-	spec.Height = 400;
+	spec.Width = 1280;
+	spec.Height = 720;
 	Application::ContextAPI API = Application::ContextAPI::GLFWOpenGL;
 	Application* app = Application::Create(API, spec);
 
-	std::shared_ptr<AppLayer> appLayer = std::make_shared<AppLayer>(app);
-	app->PushLayer(appLayer);
+	app->PushLayer<AppLayer>();
 	app->SetMenubarCallback([app]()
 	{
 		if (ImGui::BeginMenu("File"))
