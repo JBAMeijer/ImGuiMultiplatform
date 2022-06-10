@@ -2,7 +2,7 @@
 // Renderers
 
 #include <backends/imgui_impl_opengl3.cpp>
-#if !defined(REMOVE_VULKAN)
+#if defined(LOAD_VULKAN)
 #include <backends/imgui_impl_vulkan.cpp>
 #endif
 #if defined(PLATFORM_WINDOWS)
@@ -10,7 +10,7 @@
 #endif
 
 // Platforms
-#if !defined(REMOVE_SDL)
+#if defined(LOAD_SDL)
 #include <backends/imgui_impl_sdl.cpp>
 #endif
 #include <backends/imgui_impl_glfw.cpp>
