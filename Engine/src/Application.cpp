@@ -36,9 +36,6 @@ Application* Application::Create(const ContextAPI& api, const Application::Speci
 
 void Application::RenderLayers()
 {
-	// enable docking
-	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_None);
-
 	if (m_MenubarCallback)
 	{
 		if (ImGui::BeginMainMenuBar())
@@ -50,6 +47,14 @@ void Application::RenderLayers()
 
 	for (auto& layer : m_LayerStack)
 		layer->OnUIRender();
+}
+
+void Application::SetFrameRateLimit(int limit)
+{
+	if (limit >= 10)
+		m_FPSLimit = 1000.f / limit;
+	else if (limit == 0)
+		m_FPSLimit = limit;
 }
 
 void Application::DestroyLayers()

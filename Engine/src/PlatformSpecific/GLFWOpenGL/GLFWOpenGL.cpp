@@ -1,6 +1,9 @@
 #include "GLFWOpenGL.h"
 #include "Application.h"
 
+#include <thread>
+#include <chrono>
+
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -42,6 +45,11 @@ void GLFWOpenGL::Run()
 
     while(!glfwWindowShouldClose(m_WindowHandle) && m_Running)
     {
+        float framerate = io.Framerate / 1000.f;
+        float timeLeft = m_FPSLimit - framerate;
+        if(timeLeft > 0.f)
+            std::this_thread::sleep_for(std::chrono::milliseconds((int)timeLeft));
+
         // Poll and handle events (inputs, window resize, etc.)
 		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.

@@ -40,6 +40,7 @@ public:
 	virtual void Run() = 0;
 	virtual void SetMenubarCallback(const std::function<void()>& menubarCallback) { m_MenubarCallback = menubarCallback; };
 	virtual void SetMainloopCallback(const std::function<void()>& mainloopCallback) { m_MainloopCallback = mainloopCallback; };
+	void SetFrameRateLimit(int limit);
 
 	virtual void Close() { m_Running = false; }
 	
@@ -65,23 +66,23 @@ public:
 	static Application* Create(const ContextAPI&, const Specification&);
 
 protected:
-	virtual void RenderLayers();
-
-	void DestroyLayers();
-
-private:
-	virtual void Init() = 0;
-	virtual void Shutdown() = 0;
-
-protected:
 	bool m_renderingAllowed = true;
 	bool m_Running = false;
+	float m_FPSLimit = 0.f;
 	const Specification& m_Specification;
 	std::function<void()> m_MainloopCallback;
+
+protected:
+	virtual void RenderLayers();
+	void DestroyLayers();
 
 private:
 	std::vector<std::shared_ptr<Layer>> m_LayerStack;
 	std::function<void()> m_MenubarCallback;
+
+private:
+	virtual void Init() = 0;
+	virtual void Shutdown() = 0;
 };
 
 Application* CreateApplication(int argc, char** argv);
