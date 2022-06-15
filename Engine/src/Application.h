@@ -45,23 +45,27 @@ public:
 	virtual void Close() { m_Running = false; }
 	
 	template<typename T>
-	void PushLayer()
+	Layer* PushLayer()
 	{
 		static_assert(std::is_base_of<Layer, T>::value, "Pushed type is not subclass of Layer!");
-		m_LayerStack.emplace_back(std::make_shared<T>())->OnAttach();
-	}
-	virtual void PushLayer(const std::shared_ptr<Layer>& layer)
-	{
-		m_LayerStack.emplace_back(layer); 
+		Layer* layer = m_LayerStack.emplace_back(std::make_unique<T>()).get();
 		layer->OnAttach();
+		return layer;
 	}
 
-	virtual void PopLayer(const std::shared_ptr<Layer>& layer)
+	virtual Layer* PushLayer(Layer&& layer)
+	{
+		Layer* Tlayer = m_LayerStack.emplace_back(std::make_unique<Layer>(layer)).get();
+		Tlayer->OnAttach();
+		return Tlayer;
+	}
+
+	/*virtual void PopLayer(const std::unique_ptr<Layer>&& layer)
 	{
 		auto it = std::find(m_LayerStack.begin(), m_LayerStack.end(), layer);
 		if (it != m_LayerStack.end())
 			m_LayerStack.erase(it);
-	}
+	}*/
 
 	static Application* Create(const ContextAPI&, const Specification&);
 
@@ -77,7 +81,7 @@ protected:
 	void DestroyLayers();
 
 private:
-	std::vector<std::shared_ptr<Layer>> m_LayerStack;
+	std::vector<std::unique_ptr<Layer>> m_LayerStack;
 	std::function<void()> m_MenubarCallback;
 
 private:
