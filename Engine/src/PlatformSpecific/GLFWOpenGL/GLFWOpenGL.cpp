@@ -121,6 +121,7 @@ void GLFWOpenGL::Init()
 #endif
 
     // Create window with graphics context
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     m_WindowHandle = glfwCreateWindow(m_Specification.Width, m_Specification.Height, m_Specification.Name.c_str(), NULL, NULL);
     if(m_WindowHandle == nullptr)
         return;
