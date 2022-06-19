@@ -1,3 +1,8 @@
+# Dev-1
+This branch has some changes that are not yet part of the main branch.\
+These changes are:
+* Windowhints. In this case GLFW specific ones.
+
 # ImGuiMultiplatform
 
 `git clone --recursive git@github.com:JBAMeijer/ImGuiMultiplatform.git`
