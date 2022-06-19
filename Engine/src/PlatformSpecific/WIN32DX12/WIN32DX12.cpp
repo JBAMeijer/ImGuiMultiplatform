@@ -55,166 +55,170 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-WIN32DX12::WIN32DX12(const Application::Specification& specification)
-	: Application(specification)
-{
-	Init();
-}
+namespace CF {
 
-WIN32DX12::~WIN32DX12()
-{
-	Shutdown();
-}
-
-void WIN32DX12::Run()
-{
-	// Our state
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	ImGuiIO& io = ImGui::GetIO();
-	m_Running = true;
-
-	while (m_Running)
+	WIN32DX12::WIN32DX12(const Application::Specification& specification)
+		: Application(specification)
 	{
-		// Poll and handle messages (inputs, window resize, etc.)
-		// See the WndProc() function below for our to dispatch events to the Win32 backend.
-		MSG msg;
-		while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+		Init();
+	}
+
+	WIN32DX12::~WIN32DX12()
+	{
+		Shutdown();
+	}
+
+	void WIN32DX12::Run()
+	{
+		// Our state
+		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+		ImGuiIO& io = ImGui::GetIO();
+		m_Running = true;
+
+		while (m_Running)
 		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-			if (msg.message == WM_QUIT)
-				Close();
+			// Poll and handle messages (inputs, window resize, etc.)
+			// See the WndProc() function below for our to dispatch events to the Win32 backend.
+			MSG msg;
+			while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+				if (msg.message == WM_QUIT)
+					Close();
+			}
+			if (!m_Running)
+				break;
+
+			// Start the Dear ImGui frame
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
+			RenderLayers();
+
+			// Rendering
+			ImGui::Render();
+
+			FrameContext* frameCtx = WaitForNextFrameResources();
+			UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
+			frameCtx->CommandAllocator->Reset();
+
+			D3D12_RESOURCE_BARRIER barrier = {};
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.pResource = g_mainRenderTargetResource[backBufferIdx];
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			g_pd3dCommandList->Reset(frameCtx->CommandAllocator, NULL);
+			g_pd3dCommandList->ResourceBarrier(1, &barrier);
+
+			// Render Dear ImGui graphics
+			const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+			g_pd3dCommandList->ClearRenderTargetView(g_mainRenderTargetDescriptor[backBufferIdx], clear_color_with_alpha, 0, NULL);
+			g_pd3dCommandList->OMSetRenderTargets(1, &g_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
+			g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			g_pd3dCommandList->ResourceBarrier(1, &barrier);
+			g_pd3dCommandList->Close();
+
+			g_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&g_pd3dCommandList);
+
+			// Update and Render additional Platform Windows
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault(NULL, (void*)g_pd3dCommandList);
+			}
+
+			g_pSwapChain->Present(1, 0); // Present with vsync
+			//g_pSwapChain->Present(0, 0); // Present without vsync
+
+			UINT64 fenceValue = g_fenceLastSignaledValue + 1;
+			g_pd3dCommandQueue->Signal(g_fence, fenceValue);
+			g_fenceLastSignaledValue = fenceValue;
+			frameCtx->FenceValue = fenceValue;
 		}
-		if (!m_Running)
-			break;
 
-		// Start the Dear ImGui frame
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
+		WaitForLastSubmittedFrame();
+	}
 
-		RenderLayers();
+	void WIN32DX12::Init()
+	{
+		std::wstring stemp = std::wstring(m_Specification.Name.begin(), m_Specification.Name.end());
+		LPCWSTR sw = stemp.c_str();
 
-		// Rendering
-		ImGui::Render();
+		m_wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
+		::RegisterClassEx(&m_wc);
+		m_WindowHandle = ::CreateWindow(m_wc.lpszClassName, sw, WS_OVERLAPPEDWINDOW, 100, 100, m_Specification.Width, m_Specification.Height, NULL, NULL, m_wc.hInstance, NULL);
 
-		FrameContext* frameCtx = WaitForNextFrameResources();
-		UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
-		frameCtx->CommandAllocator->Reset();
+		// Initialize Direct3D
+		if (!CreateDeviceD3D(m_WindowHandle))
+		{
+			CleanupDeviceD3D();
+			::UnregisterClass(m_wc.lpszClassName, m_wc.hInstance);
+			return;
+		}
 
-		D3D12_RESOURCE_BARRIER barrier = {};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = g_mainRenderTargetResource[backBufferIdx];
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		g_pd3dCommandList->Reset(frameCtx->CommandAllocator, NULL);
-		g_pd3dCommandList->ResourceBarrier(1, &barrier);
+		// Show the window
+		::ShowWindow(m_WindowHandle, SW_SHOWDEFAULT);
+		::UpdateWindow(m_WindowHandle);
 
-		// Render Dear ImGui graphics
-		const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-		g_pd3dCommandList->ClearRenderTargetView(g_mainRenderTargetDescriptor[backBufferIdx], clear_color_with_alpha, 0, NULL);
-		g_pd3dCommandList->OMSetRenderTargets(1, &g_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
-		g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		g_pd3dCommandList->ResourceBarrier(1, &barrier);
-		g_pd3dCommandList->Close();
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigViewportsNoAutoMerge = true;
+		//io.ConfigViewportsNoTaskBarIcon = true;
+		//io.ConfigViewportsNoDefaultParent = true;
+		//io.ConfigDockingAlwaysTabBar = true;
+		//io.ConfigDockingTransparentPayload = true;
 
-		g_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&g_pd3dCommandList);
+		// Setup Dear ImGui style
+		ImGui::StyleColorsDark();
 
-		// Update and Render additional Platform Windows
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault(NULL, (void*)g_pd3dCommandList);
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		g_pSwapChain->Present(1, 0); // Present with vsync
-		//g_pSwapChain->Present(0, 0); // Present without vsync
+		ImGui_ImplWin32_Init(m_WindowHandle);
+		ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
+			DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
+			g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
+			g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-		UINT64 fenceValue = g_fenceLastSignaledValue + 1;
-		g_pd3dCommandQueue->Signal(g_fence, fenceValue);
-		g_fenceLastSignaledValue = fenceValue;
-		frameCtx->FenceValue = fenceValue;
+		ImFontConfig fontConfig;
+		fontConfig.FontDataOwnedByAtlas = false;
+		ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.f, &fontConfig);
+		IM_ASSERT(robotoFont != NULL);
+		io.FontDefault = robotoFont;
 	}
 
-	WaitForLastSubmittedFrame();
-}
-
-void WIN32DX12::Init()
-{
-	std::wstring stemp = std::wstring(m_Specification.Name.begin(), m_Specification.Name.end());
-	LPCWSTR sw = stemp.c_str();
-
-	m_wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
-	::RegisterClassEx(&m_wc);
-	m_WindowHandle = ::CreateWindow(m_wc.lpszClassName, sw, WS_OVERLAPPEDWINDOW, 100, 100, m_Specification.Width, m_Specification.Height, NULL, NULL, m_wc.hInstance, NULL);
-
-	// Initialize Direct3D
-	if (!CreateDeviceD3D(m_WindowHandle))
+	void WIN32DX12::Shutdown()
 	{
+		// Cleanup
+		DestroyLayers();
+		ImGui_ImplDX12_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+
 		CleanupDeviceD3D();
+		::DestroyWindow(m_WindowHandle);
 		::UnregisterClass(m_wc.lpszClassName, m_wc.hInstance);
-		return;
+
+		g_ApplicationRunning = false;
 	}
 
-	// Show the window
-	::ShowWindow(m_WindowHandle, SW_SHOWDEFAULT);
-	::UpdateWindow(m_WindowHandle);
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-	//io.ConfigViewportsNoAutoMerge = true;
-	//io.ConfigViewportsNoTaskBarIcon = true;
-	//io.ConfigViewportsNoDefaultParent = true;
-	//io.ConfigDockingAlwaysTabBar = true;
-	//io.ConfigDockingTransparentPayload = true;
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-
-	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-
-	ImGui_ImplWin32_Init(m_WindowHandle);
-	ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
-		g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
-		g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-	ImFontConfig fontConfig;
-	fontConfig.FontDataOwnedByAtlas = false;
-	ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.f, &fontConfig);
-	IM_ASSERT(robotoFont != NULL);
-	io.FontDefault = robotoFont;
-}
-
-void WIN32DX12::Shutdown()
-{
-	// Cleanup
-	DestroyLayers();
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-
-	CleanupDeviceD3D();
-	::DestroyWindow(m_WindowHandle);
-	::UnregisterClass(m_wc.lpszClassName, m_wc.hInstance);
-
-	g_ApplicationRunning = false;
 }
 
 // Helper functions

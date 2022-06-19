@@ -13,54 +13,58 @@
 #include "PlatformSpecific/WIN32DX12/WIN32DX12.h"
 #endif
 
-Application* Application::Create(const ContextAPI& api, const Application::Specification& spec)
-{
-	switch (api)
+namespace CF {
+
+	Application* Application::Create(const ContextAPI& api, const Application::Specification& spec)
 	{
-	case ContextAPI::None: return new None(spec);
+		switch (api)
+		{
+		case ContextAPI::None: return new None(spec);
 #if defined(LOAD_SDL)
-	case ContextAPI::SDLOpenGL: return new SDLOpenGL(spec);
+		case ContextAPI::SDLOpenGL: return new SDLOpenGL(spec);
 #endif
-	case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
+		case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
 #if defined(LOAD_VULKAN)
-	case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
+		case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
 #endif
 #if defined(PLATFORM_WINDOWS)
-	case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
+		case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
 #endif
-	}
-
-	fprintf(stderr, "Unknown API!");
-	return nullptr;
-}
-
-void Application::RenderLayers()
-{
-	if (m_MenubarCallback)
-	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			m_MenubarCallback();
-			ImGui::EndMainMenuBar();
 		}
+
+		fprintf(stderr, "Unknown API!");
+		return nullptr;
 	}
 
-	for (auto& layer : m_LayerStack)
-		layer->OnUIRender();
-}
+	void Application::RenderLayers()
+	{
+		if (m_MenubarCallback)
+		{
+			if (ImGui::BeginMainMenuBar())
+			{
+				m_MenubarCallback();
+				ImGui::EndMainMenuBar();
+			}
+		}
 
-void Application::SetFrameRateLimit(int limit)
-{
-	if (limit >= 10)
-		m_FPSLimit = 1000.f / limit;
-	else if (limit == 0)
-		m_FPSLimit = limit;
-}
+		for (auto& layer : m_LayerStack)
+			layer->OnUIRender();
+	}
 
-void Application::DestroyLayers()
-{
-	for(auto& layer : m_LayerStack)
-    	layer->OnDetach();
+	void Application::SetFrameRateLimit(int limit)
+	{
+		if (limit >= 10)
+			m_FPSLimit = 1000.f / limit;
+		else if (limit == 0)
+			m_FPSLimit = limit;
+	}
 
-    m_LayerStack.clear();
+	void Application::DestroyLayers()
+	{
+		for (auto& layer : m_LayerStack)
+			layer->OnDetach();
+
+		m_LayerStack.clear();
+	}
+
 }

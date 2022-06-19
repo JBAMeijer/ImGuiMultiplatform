@@ -1,12 +1,16 @@
 #pragma once
 
-class Layer
-{
-public:
-	virtual ~Layer() = default;
+namespace CF {
 
-	virtual void OnAttach() {}
-	virtual void OnDetach() {}
+	class Layer
+	{
+	public:
+		virtual ~Layer() = default;
 
-	virtual void OnUIRender() {}
-};
+		virtual void OnAttach() {}
+		virtual void OnDetach() {}
+
+		virtual void OnUIRender() {}
+	};
+
+}

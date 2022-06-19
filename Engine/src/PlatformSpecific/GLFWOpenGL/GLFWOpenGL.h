@@ -3,18 +3,22 @@
 
 struct GLFWwindow;
 
-class GLFWOpenGL : public Application
-{
-public:
-    GLFWOpenGL(const Application::Specification Specification);
-    virtual ~GLFWOpenGL();
+namespace CF {
 
-    virtual void Run() override;
+    class GLFWOpenGL : public Application
+    {
+    public:
+        GLFWOpenGL(const Application::Specification Specification);
+        virtual ~GLFWOpenGL();
 
-private:
-    void Init();
-    void Shutdown();
+        virtual void Run() override;
 
-private:
-    GLFWwindow* m_WindowHandle = nullptr;
-};
+    private:
+        void Init();
+        void Shutdown();
+
+    private:
+        GLFWwindow* m_WindowHandle = nullptr;
+    };
+
+}

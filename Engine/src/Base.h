@@ -3,7 +3,6 @@
 #define REMOVE_VULKAN2 REMOVE_VULKAN
 #define REMOVE_SDL2 REMOVE_SDL
 
-
 #if defined(_WIN32)
 	#if defined(_WIN64)
 		#define PLATFORM_WINDOWS

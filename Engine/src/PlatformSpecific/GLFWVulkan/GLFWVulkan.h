@@ -3,19 +3,22 @@
 
 struct GLFWwindow;
 
-class GLFWVulkan : public Application
-{
-public:
-	GLFWVulkan(const Application::Specification Specification);
-	virtual ~GLFWVulkan();
+namespace CF {
 
-	virtual void Run() override;
+	class GLFWVulkan : public Application
+	{
+	public:
+		GLFWVulkan(const Application::Specification Specification);
+		virtual ~GLFWVulkan();
 
-private:
-	void Init();
-	void Shutdown();
+		virtual void Run() override;
 
-private:
-	GLFWwindow* m_WindowHandle;
-};
+	private:
+		void Init();
+		void Shutdown();
 
+	private:
+		GLFWwindow* m_WindowHandle;
+	};
+
+}

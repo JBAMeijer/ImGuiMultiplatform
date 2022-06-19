@@ -1,19 +1,22 @@
 #pragma once
 #include "Application.h"
 
-class None : public Application
-{
-public:
-	None(const Application::Specification& applicationSpecification = Application::Specification());
-	virtual ~None();
+namespace CF {
 
-	void Run() override;
+	class None : public Application
+	{
+	public:
+		None(const Application::Specification& applicationSpecification = Application::Specification());
+		virtual ~None();
+
+		void Run() override;
 
 
-	void Close() override;
+		void Close() override;
 
-private:
-	void Init();
-	void Shutdown();
-};
+	private:
+		void Init() override;
+		void Shutdown() override;
+	};
 
+}

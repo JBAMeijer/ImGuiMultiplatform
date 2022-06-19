@@ -343,230 +343,234 @@ static void glfw_error_callback(int error, const char* description)
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-GLFWVulkan::GLFWVulkan(const Application::Specification Specification)
-	: Application(Specification)
-{
-	Init();
-}
+namespace CF {
 
-GLFWVulkan::~GLFWVulkan()
-{
-	Shutdown();
-}
-
-void GLFWVulkan::Run()
-{
-	m_Running = true;
-
-	ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	ImGuiIO& io = ImGui::GetIO();
-
-	// Main loop
-	while (!glfwWindowShouldClose(m_WindowHandle) && m_Running)
+	GLFWVulkan::GLFWVulkan(const Application::Specification Specification)
+		: Application(Specification)
 	{
-		// Poll and handle events (inputs, window resize, etc.)
-		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-		// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-		// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-		glfwPollEvents();
+		Init();
+	}
 
-		// Resize swap chain?
-		if (g_SwapChainRebuild)
+	GLFWVulkan::~GLFWVulkan()
+	{
+		Shutdown();
+	}
+
+	void GLFWVulkan::Run()
+	{
+		m_Running = true;
+
+		ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
+		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+		ImGuiIO& io = ImGui::GetIO();
+
+		// Main loop
+		while (!glfwWindowShouldClose(m_WindowHandle) && m_Running)
 		{
-			int width, height;
-			glfwGetFramebufferSize(m_WindowHandle, &width, &height);
-			if (width > 0 && height > 0)
+			// Poll and handle events (inputs, window resize, etc.)
+			// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+			// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+			// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+			// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+			glfwPollEvents();
+
+			// Resize swap chain?
+			if (g_SwapChainRebuild)
 			{
-				ImGui_ImplVulkan_SetMinImageCount(g_MinImageCount);
-				ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
-				g_MainWindowData.FrameIndex = 0;
-				g_SwapChainRebuild = false;
+				int width, height;
+				glfwGetFramebufferSize(m_WindowHandle, &width, &height);
+				if (width > 0 && height > 0)
+				{
+					ImGui_ImplVulkan_SetMinImageCount(g_MinImageCount);
+					ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+					g_MainWindowData.FrameIndex = 0;
+					g_SwapChainRebuild = false;
+				}
 			}
+
+			m_MainloopCallback();
+
+			// Start the Dear ImGui frame
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			//if(m_renderingAllowed)
+			RenderLayers();
+			//else
+			//	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+			// Rendering
+			ImGui::Render();
+			ImDrawData* main_draw_data = ImGui::GetDrawData();
+			const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+			wd->ClearValue.color.float32[0] = clear_color.x * clear_color.w;
+			wd->ClearValue.color.float32[1] = clear_color.y * clear_color.w;
+			wd->ClearValue.color.float32[2] = clear_color.z * clear_color.w;
+			wd->ClearValue.color.float32[3] = clear_color.w;
+			if (!main_is_minimized)
+				FrameRender(wd, main_draw_data);
+
+			// Update and Render additional Platform Windows
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+
+			// Present Main Platform Window
+			if (!main_is_minimized)
+				FramePresent(wd);
+		}
+	}
+
+	void GLFWVulkan::Init()
+	{
+		// Setup GLFW window
+		glfwSetErrorCallback(glfw_error_callback);
+		if (!glfwInit())
+		{
+			fprintf(stderr, "Could not Initialize GLFW!\n");
+			return;
 		}
 
-		m_MainloopCallback();
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		m_WindowHandle = glfwCreateWindow(m_Specification.Width, m_Specification.Height, m_Specification.Name.c_str(), NULL, NULL);
 
-		// Start the Dear ImGui frame
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		// Setup Vulkan
+		if (!glfwVulkanSupported())
+		{
+			fprintf(stderr, "GLFW: Vulkan not supported!\n");
+			return;
+		}
+		uint32_t extensions_count = 0;
+		const char** extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
+		SetupVulkan(extensions, extensions_count);
 
-		//if(m_renderingAllowed)
-			RenderLayers();
-		//else
-		//	std::this_thread::sleep_for(std::chrono::seconds(1));
+		// Create Window Surface
+		VkSurfaceKHR surface;
+		VkResult err = glfwCreateWindowSurface(g_Instance, m_WindowHandle, g_Allocator, &surface);
+		check_vk_result(err);
 
+		// Create Framebuffers
+		int w, h;
+		glfwGetFramebufferSize(m_WindowHandle, &w, &h);
+		ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
+		SetupVulkanWindow(wd, surface, w, h);
 
-		// Rendering
-		ImGui::Render();
-		ImDrawData* main_draw_data = ImGui::GetDrawData();
-		const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
-		wd->ClearValue.color.float32[0] = clear_color.x * clear_color.w;
-		wd->ClearValue.color.float32[1] = clear_color.y * clear_color.w;
-		wd->ClearValue.color.float32[2] = clear_color.z * clear_color.w;
-		wd->ClearValue.color.float32[3] = clear_color.w;
-		if (!main_is_minimized)
-			FrameRender(wd, main_draw_data);
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigViewportsNoAutoMerge = true;
+		//io.ConfigViewportsNoTaskBarIcon = true;
 
-		// Update and Render additional Platform Windows
+		// Setup Dear ImGui style
+		ImGui::StyleColorsDark();
+		//ImGui::StyleColorsClassic();
+
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		// Present Main Platform Window
-		if (!main_is_minimized)
-			FramePresent(wd);
-	}
-}
+		// Setup Platform/Renderer backends
+		ImGui_ImplGlfw_InitForVulkan(m_WindowHandle, true);
+		ImGui_ImplVulkan_InitInfo init_info = {};
+		init_info.Instance = g_Instance;
+		init_info.PhysicalDevice = g_PhysicalDevice;
+		init_info.Device = g_Device;
+		init_info.QueueFamily = g_QueueFamily;
+		init_info.Queue = g_Queue;
+		init_info.PipelineCache = g_PipelineCache;
+		init_info.DescriptorPool = g_DescriptorPool;
+		init_info.Subpass = 0;
+		init_info.MinImageCount = g_MinImageCount;
+		init_info.ImageCount = wd->ImageCount;
+		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		init_info.Allocator = g_Allocator;
+		init_info.CheckVkResultFn = check_vk_result;
+		ImGui_ImplVulkan_Init(&init_info, wd->RenderPass);
 
-void GLFWVulkan::Init()
-{
-	// Setup GLFW window
-	glfwSetErrorCallback(glfw_error_callback);
-	if (!glfwInit())
-	{
-		fprintf(stderr, "Could not Initialize GLFW!\n");
-		return;
-	}
+		// Load default font
+		ImFontConfig fontConfig;
+		fontConfig.FontDataOwnedByAtlas = false;
+		ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.0f, &fontConfig);
+		IM_ASSERT(robotoFont != NULL);
+		io.FontDefault = robotoFont;
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	m_WindowHandle = glfwCreateWindow(m_Specification.Width, m_Specification.Height, m_Specification.Name.c_str(), NULL, NULL);
-
-	// Setup Vulkan
-	if (!glfwVulkanSupported())
-	{
-		fprintf(stderr, "GLFW: Vulkan not supported!\n");
-		return;
-	}
-	uint32_t extensions_count = 0;
-	const char** extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
-	SetupVulkan(extensions, extensions_count);
-
-	// Create Window Surface
-	VkSurfaceKHR surface;
-	VkResult err = glfwCreateWindowSurface(g_Instance, m_WindowHandle, g_Allocator, &surface);
-	check_vk_result(err);
-
-	// Create Framebuffers
-	int w, h;
-	glfwGetFramebufferSize(m_WindowHandle, &w, &h);
-	ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
-	SetupVulkanWindow(wd, surface, w, h);
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-	//io.ConfigViewportsNoAutoMerge = true;
-	//io.ConfigViewportsNoTaskBarIcon = true;
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsClassic();
-
-	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForVulkan(m_WindowHandle, true);
-	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = g_Instance;
-	init_info.PhysicalDevice = g_PhysicalDevice;
-	init_info.Device = g_Device;
-	init_info.QueueFamily = g_QueueFamily;
-	init_info.Queue = g_Queue;
-	init_info.PipelineCache = g_PipelineCache;
-	init_info.DescriptorPool = g_DescriptorPool;
-	init_info.Subpass = 0;
-	init_info.MinImageCount = g_MinImageCount;
-	init_info.ImageCount = wd->ImageCount;
-	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-	init_info.Allocator = g_Allocator;
-	init_info.CheckVkResultFn = check_vk_result;
-	ImGui_ImplVulkan_Init(&init_info, wd->RenderPass);
-
-	// Load default font
-	ImFontConfig fontConfig;
-	fontConfig.FontDataOwnedByAtlas = false;
-	ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.0f, &fontConfig);
-	IM_ASSERT(robotoFont != NULL);
-	io.FontDefault = robotoFont;
-
-	// Upload Fonts
-	{
-		// Use any command queue
-		VkCommandPool command_pool = wd->Frames[wd->FrameIndex].CommandPool;
-		VkCommandBuffer command_buffer = wd->Frames[wd->FrameIndex].CommandBuffer;
-
-		err = vkResetCommandPool(g_Device, command_pool, 0);
-		check_vk_result(err);
-		VkCommandBufferBeginInfo begin_info = {};
-		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		err = vkBeginCommandBuffer(command_buffer, &begin_info);
-		check_vk_result(err);
-
-		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-
-		VkSubmitInfo end_info = {};
-		end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		end_info.commandBufferCount = 1;
-		end_info.pCommandBuffers = &command_buffer;
-		err = vkEndCommandBuffer(command_buffer);
-		check_vk_result(err);
-		err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
-		check_vk_result(err);
-
-		err = vkDeviceWaitIdle(g_Device);
-		check_vk_result(err);
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
-	}
-
-	static bool& allowed = m_renderingAllowed;
-
-	glfwSetWindowIconifyCallback(m_WindowHandle, [](GLFWwindow* window, int iconified) {
-		if(iconified)
+		// Upload Fonts
 		{
-			printf("Window iconified!\n");
-			allowed = false;
+			// Use any command queue
+			VkCommandPool command_pool = wd->Frames[wd->FrameIndex].CommandPool;
+			VkCommandBuffer command_buffer = wd->Frames[wd->FrameIndex].CommandBuffer;
+
+			err = vkResetCommandPool(g_Device, command_pool, 0);
+			check_vk_result(err);
+			VkCommandBufferBeginInfo begin_info = {};
+			begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			err = vkBeginCommandBuffer(command_buffer, &begin_info);
+			check_vk_result(err);
+
+			ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+
+			VkSubmitInfo end_info = {};
+			end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			end_info.commandBufferCount = 1;
+			end_info.pCommandBuffers = &command_buffer;
+			err = vkEndCommandBuffer(command_buffer);
+			check_vk_result(err);
+			err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
+			check_vk_result(err);
+
+			err = vkDeviceWaitIdle(g_Device);
+			check_vk_result(err);
+			ImGui_ImplVulkan_DestroyFontUploadObjects();
 		}
-		else
-		{
-			printf("Window restored!\n");
-			allowed = true;
-		}
 
-	});
-}
+		static bool& allowed = m_renderingAllowed;
 
-void GLFWVulkan::Shutdown()
-{
-	// Cleanup
-	DestroyLayers();
-	VkResult err = vkDeviceWaitIdle(g_Device);
-	check_vk_result(err);
-	ImGui_ImplVulkan_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+		glfwSetWindowIconifyCallback(m_WindowHandle, [](GLFWwindow* window, int iconified) {
+			if (iconified)
+			{
+				printf("Window iconified!\n");
+				allowed = false;
+			}
+			else
+			{
+				printf("Window restored!\n");
+				allowed = true;
+			}
 
-	CleanupVulkanWindow();
-	CleanupVulkan();
+			});
+	}
 
-	glfwDestroyWindow(m_WindowHandle);
-	glfwTerminate();
+	void GLFWVulkan::Shutdown()
+	{
+		// Cleanup
+		DestroyLayers();
+		VkResult err = vkDeviceWaitIdle(g_Device);
+		check_vk_result(err);
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 
-	g_ApplicationRunning = false;
+		CleanupVulkanWindow();
+		CleanupVulkan();
+
+		glfwDestroyWindow(m_WindowHandle);
+		glfwTerminate();
+
+		g_ApplicationRunning = false;
+	}
+
 }

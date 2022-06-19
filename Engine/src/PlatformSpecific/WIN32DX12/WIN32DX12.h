@@ -2,20 +2,23 @@
 #include "Application.h"
 #include <windows.h>
 
-class WIN32DX12 : public Application
-{
-public:
-	WIN32DX12(const Application::Specification& specification);
-	virtual ~WIN32DX12();
+namespace CF {
 
-	void Run() override;
+	class WIN32DX12 : public Application
+	{
+	public:
+		WIN32DX12(const Application::Specification& specification);
+		virtual ~WIN32DX12();
 
-private:
-	void Init();
-	void Shutdown();
+		void Run() override;
 
-private:
-	HWND m_WindowHandle;
-	WNDCLASSEX m_wc;
-};
+	private:
+		void Init();
+		void Shutdown();
 
+	private:
+		HWND m_WindowHandle;
+		WNDCLASSEX m_wc;
+	};
+
+}
