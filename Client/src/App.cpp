@@ -8,14 +8,14 @@ void Mainloop()
 }
 
 
-Application* CreateApplication(int argc, char** argv)
+CF::Application* CF::CreateApplication(int argc, char** argv)
 {
-	Application::Specification spec;
+	CF::Application::Specification spec;
 	spec.Name = "Test";
 	spec.Width = 1280;
 	spec.Height = 720;
-	Application::ContextAPI API = Application::ContextAPI::GLFWOpenGL;
-	Application* app = Application::Create(API, spec);
+	CF::Application::ContextAPI API = CF::Application::ContextAPI::GLFWOpenGL;
+	CF::Application* app = CF::Application::Create(API, spec);
 
 	app->PushLayer<AppLayer>();
 	app->SetMenubarCallback([app]()

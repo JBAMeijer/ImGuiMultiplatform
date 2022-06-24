@@ -196,5 +196,10 @@ project "Client"
 	filter "configurations:Dist"
 		defines "CF_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
+		symbols "Off"
+
+	filter { "system:windows", "configurations:Dist" } 
+		kind "WindowedApp"
+
 group ""

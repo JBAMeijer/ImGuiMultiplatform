@@ -29,7 +29,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 	return CF::EntryPoint(__argc, __argv);
 }
 
-#elif defined(CF_DIST)
+#else
 
 int main(int argc, char** argv)
 {
