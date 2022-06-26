@@ -1,33 +1,17 @@
 #pragma once
 #include <Image/Image.h>
 
-typedef unsigned int GLuint;
+using GLuint = unsigned int;
 
 namespace CF
 {
-	class OpenGLImage : public Image
+	class OpenGLImageIO : public ImageIO
 	{
 	public:
-		OpenGLImage() { Load(); };
-		virtual ~OpenGLImage() { Clear(); };
+		Image LoadImage(const std::string& path) override;
+		bool WriteImage(const std::string& path, const Image& image) override;
 
-		virtual uint32_t GetWidth() const { m_Width; };
-		virtual uint32_t GetHeight() const { m_Height; };
-
-		virtual unsigned char* GetDataPointer() const { m_DataPointer; };
-
-		virtual void SetNewImage(const Image& image);
-
-		virtual void operator=(const Image& image);
-
-	private:
-		void Load();
-		void Clear();
-
-	private:
-		uint32_t m_Width, m_Height;
-		unsigned char* m_DataPointer;
-		GLuint* m_TextureID;
+		void ClearImage(Image* image) override;
 	};
 }
 

@@ -9,25 +9,42 @@
 #include <string>
 #include <memory>
 
+#include <Application.h>
+#include <imgui.h>
+
 namespace CF
 {
-
-	class Image
+	struct Image
 	{
 	public:
-		virtual ~Image() = default;
+		Image();
+		Image(void* textureID, uint32_t width, uint32_t height, unsigned char* dataPointer);
+		
+		~Image();
 
-		virtual uint32_t GetWidth() {};
-		virtual uint32_t GetHeight() {};
-
-		virtual unsigned char* GetDataPointer() {};
+		uint32_t m_Width, m_Height;
+		unsigned char* m_DataPointer;
+		void* m_TextureID;
 	
-		virtual void SetNewImage(const Image& image) {};
+		void SetNewImage(const Image& image) {}
 
-		virtual void operator=(const Image& image) {};
+		operator ImTextureID() const { return nullptr; }
+		void operator=(const Image& D);
+
 	};
 
-	// Static Functions
-	static Image LoadImage(const std::string& path);
-	//static void WriteImage(const std::string& path, const Image& image);
+	class ImageIO
+	{
+	public:
+		virtual Image LoadImage(const std::string& path) = 0;
+		virtual bool WriteImage(const std::string& path, const Image& image) = 0;
+		virtual void ClearImage(Image* image) = 0;
+
+		static void Create(const Application::ContextAPI api);
+	};
+	// Free Functions
+	Image LoadImage(const std::string& path);
+	void WriteImage(const std::string& path, const Image& image);
+
+	static std::unique_ptr<ImageIO> s_ImageIO;
 }
