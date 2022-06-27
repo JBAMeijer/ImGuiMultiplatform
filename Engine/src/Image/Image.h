@@ -14,22 +14,36 @@
 
 namespace CF
 {
+	struct TextureContainer
+	{
+		ImTextureID m_TextureID = 0;
+		uint32_t m_RefCount = 0;
+
+		TextureContainer() {}
+		TextureContainer(ImTextureID id) : m_TextureID(id) {}
+
+		operator ImTextureID() const { return m_TextureID; }
+
+		void IncrementRefCount() { m_RefCount++; }
+		void DecrementRefCount() { m_RefCount--; }
+
+	};
+
 	struct Image
 	{
 	public:
 		Image();
-		Image(void* textureID, uint32_t width, uint32_t height, unsigned char* dataPointer);
+		Image(ImTextureID textureID, uint32_t width, uint32_t height);
 		
 		~Image();
 
 		uint32_t m_Width, m_Height;
-		unsigned char* m_DataPointer;
-		void* m_TextureID;
-	
+		TextureContainer* m_TextureContainer;
+			
 		void SetNewImage(const Image& image) {}
 
-		operator ImTextureID() const { return nullptr; }
-		void operator=(const Image& D);
+		operator ImTextureID() const { return m_TextureContainer->m_TextureID; }
+		void operator=(const Image& I);
 
 	};
 

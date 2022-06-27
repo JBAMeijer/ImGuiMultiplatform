@@ -144,13 +144,15 @@ project "Client"
 	files 
 	{
 		"%{prj.name}/src/**.h", 
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
 	}
 
 	includedirs 
 	{
 		"Engine/src",
 		"vendor/imgui",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.glm}"
 	}

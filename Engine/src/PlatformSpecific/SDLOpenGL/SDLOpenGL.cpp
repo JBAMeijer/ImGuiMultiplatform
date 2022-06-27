@@ -175,6 +175,9 @@ namespace CF {
 		ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.f, &fontConfig);
 		IM_ASSERT(robotoFont != NULL);
 		io.FontDefault = robotoFont;
+
+		// Create backend specific image loader
+		ImageIO::Create(Application::ContextAPI::GLFWOpenGL);
 	}
 
 	void SDLOpenGL::Shutdown()
