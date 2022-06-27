@@ -22,7 +22,7 @@ namespace CF {
 #if defined(LOAD_VULKAN)
 			GLFWVulkan,
 #endif
-#if defined(PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS) && defined(EXPERIMENTAL)
 			WIN32DX12,
 #endif
 		};

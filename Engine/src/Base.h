@@ -15,10 +15,10 @@
 	#error "Unknown or unsupported platform!"
 #endif
 
-#if !defined(REMOVE_VULKAN2)
+#if REMOVE_VULKAN2 == 0
 #define LOAD_VULKAN
 #endif
 
-#if !defined(REMOVE_SDL2)
+#if REMOVE_SDL2 == 0
 #define LOAD_SDL
 #endif

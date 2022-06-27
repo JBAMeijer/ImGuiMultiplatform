@@ -7,40 +7,42 @@
 namespace CF
 {
 	Image::Image()
-		: m_Width(0), m_Height(0)
+		: m_Empty(true)
 	{
-		m_TextureContainer = new TextureContainer();
-		m_TextureContainer->IncrementRefCount();
+		m_ImageContainer = new ImageContainer();
+		m_ImageContainer->m_RefCount++;
 	}
 
 	Image::Image(ImTextureID textureID, uint32_t width, uint32_t height)
-		: m_Width(width), m_Height(height)
+		: m_Empty(false)
 	{
-		m_TextureContainer = new TextureContainer(textureID);
-		m_TextureContainer->IncrementRefCount();
+		m_ImageContainer = new ImageContainer(textureID, width, height);
+		m_ImageContainer->m_RefCount++;
 	}
 
 	Image::~Image()
 	{
-		if (m_TextureContainer->m_RefCount == 1)
+		if (m_ImageContainer->m_RefCount == 1)
 		{
 			s_ImageIO->ClearImage(this);
-			delete m_TextureContainer;
+			delete m_ImageContainer;
 		}
 		else
-			m_TextureContainer->DecrementRefCount();
+			m_ImageContainer->m_RefCount--;
 	}
 
 	void Image::operator=(const Image& D)
 	{
-		m_Width = D.m_Height;
-		m_Height = D.m_Height;
+		m_Empty = D.IsEmpty();
 
-		delete m_TextureContainer;
-		m_TextureContainer = nullptr;
+		m_ImageContainer->m_Width = D.m_ImageContainer->m_Width;
+		m_ImageContainer->m_Height = D.m_ImageContainer->m_Height;
 
-		m_TextureContainer = D.m_TextureContainer;
-		m_TextureContainer->IncrementRefCount();
+		delete m_ImageContainer;
+		m_ImageContainer = nullptr;
+
+		m_ImageContainer = D.m_ImageContainer;
+		m_ImageContainer->m_RefCount++;
 	}
 
 	void ImageIO::Create(const Application::ContextAPI api)

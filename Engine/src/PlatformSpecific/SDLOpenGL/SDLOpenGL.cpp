@@ -1,5 +1,6 @@
 #include "SDLOpenGL.h"
 #include "Application.h"
+#include "Image/Image.h"
 
 #include "imgui.h"
 

@@ -14,37 +14,44 @@
 
 namespace CF
 {
-	struct TextureContainer
+
+	class Image
 	{
-		ImTextureID m_TextureID = 0;
-		uint32_t m_RefCount = 0;
+	private:
+		struct ImageContainer
+		{
+			ImageContainer() {}
+			ImageContainer(ImTextureID id, uint32_t width, uint32_t height) 
+				: m_TextureID(id), m_Width(width), m_Height(height) {}
 
-		TextureContainer() {}
-		TextureContainer(ImTextureID id) : m_TextureID(id) {}
+			operator ImTextureID() const { return m_TextureID; }
 
-		operator ImTextureID() const { return m_TextureID; }
+			ImTextureID m_TextureID = 0;
+			uint32_t m_RefCount = 0;
+			uint32_t m_Width = 0, m_Height = 0;
+		};
 
-		void IncrementRefCount() { m_RefCount++; }
-		void DecrementRefCount() { m_RefCount--; }
-
-	};
-
-	struct Image
-	{
 	public:
 		Image();
 		Image(ImTextureID textureID, uint32_t width, uint32_t height);
 		
 		~Image();
 
-		uint32_t m_Width, m_Height;
-		TextureContainer* m_TextureContainer;
-			
+		inline bool IsEmpty() const { return m_Empty; }
+		
+		inline ImTextureID GetTextureID() const { return m_ImageContainer->m_TextureID; }
+
+		inline uint32_t GetWidth() const { return m_ImageContainer->m_Width; }
+		inline uint32_t GetHeight() const { return m_ImageContainer->m_Height; }
+
 		void SetNewImage(const Image& image) {}
 
-		operator ImTextureID() const { return m_TextureContainer->m_TextureID; }
+		operator ImTextureID() const { return m_ImageContainer->m_TextureID; }
 		void operator=(const Image& I);
 
+	private:
+		bool m_Empty;
+		ImageContainer* m_ImageContainer;
 	};
 
 	class ImageIO

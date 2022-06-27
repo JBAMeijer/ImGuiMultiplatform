@@ -20,9 +20,9 @@ public:
 
 	virtual void OnAttach() override
 	{
-		//bool ret = LoadTextureFromFile("C:\\Users\\joeym\\Pictures\\MyImage01.jpg", &my_image_texture, &my_image_width, &my_image_height);
-		//IM_ASSERT(ret);
 		image = CF::LoadImage("C:\\Users\\joeym\\Pictures\\MyImage01.jpg");
+		IM_ASSERT(!image.IsEmpty());
+		
 		image2 = image;
 		image3 = image2;
 	}
@@ -35,9 +35,9 @@ public:
 		
 
 
-		ImGui::Text("pointer = %p", image.m_TextureContainer->m_TextureID);
-		ImGui::Text("size = %d x %d", image.m_Width, image.m_Height);
-		ImGui::Image(image, ImVec2(image.m_Width, image.m_Height));
+		ImGui::Text("pointer = %p", image.GetTextureID());
+		ImGui::Text("size = %d x %d", image.GetWidth(), image.GetWidth());
+		ImGui::Image(image, ImVec2(image.GetWidth(), image.GetWidth()));
 		ImGui::End();
 	}
 

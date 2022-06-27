@@ -20,8 +20,6 @@ namespace CF
 		if (imageDataTemp == nullptr)
 			return {};
 
-
-
 		GLuint imageTexture = 0;
 
 		glGenTextures(1, &imageTexture);
@@ -49,7 +47,7 @@ namespace CF
 
 	void OpenGLImageIO::ClearImage(Image* image)
 	{
-		const GLuint texID = (GLuint)image->m_TextureContainer->m_TextureID;
+		const GLuint texID = (GLuint)image;
 		glDeleteTextures(1, &texID);
 	}
 }

@@ -27,7 +27,7 @@ namespace CF {
 #if defined(LOAD_VULKAN)
 		case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
 #endif
-#if defined(PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS) && defined(EXPERIMENTAL)
 		case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
 #endif
 		}
