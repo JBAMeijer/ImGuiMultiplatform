@@ -67,18 +67,24 @@ project "Engine"
 		"%{LibraryDir.VulkanSDK}"
 	}
 
+	defines
+	{
+		"LOAD_VULKAN",
+		"LOAD_SDL"
+	}
+
 	if not VULKAN_SDK then
 		removeincludedirs "%{IncludeDir.VulkanSDK}"
 		removelibdirs "%{LibraryDir.VulkanSDK}"
 		removefiles { "**/GLFWVulkan/**" }
-		defines "REMOVE_VULKAN"
+		removedefines "LOAD_VULKAN"
 	end
 
 	if not SDL2_SDK then
 		removeincludedirs "%{IncludeDir.SDL2SDK}"
 		removelibdirs "%{LibraryDir.SDL2SDKx64}"
 		removefiles { "**/SDLOpenGL/**" }
-		defines "REMOVE_SDL"
+		removedefines "LOAD_SDL"
 	end
 
 	filter "system:windows"

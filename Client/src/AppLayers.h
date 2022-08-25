@@ -10,14 +10,6 @@
 class AppLayer : public CF::Layer
 {
 public:
-	AppLayer() {
-		//image = std::make_unique<CF::Image>(CF::LoadImage(R"(C:\Users\Joey\Pictures\MyImage01.jpg)"));
-	}
-
-	~AppLayer()
-	{
-	}
-
 	virtual void OnAttach() override
 	{
 		image = CF::LoadImage("C:\\Users\\joeym\\Pictures\\MyImage01.jpg");

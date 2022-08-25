@@ -17,7 +17,8 @@ CF::Application* CF::CreateApplication(int argc, char** argv)
 	CF::Application::ContextAPI API = CF::Application::ContextAPI::GLFWOpenGL;
 	CF::Application* app = CF::Application::Create(API, spec);
 
-	app->PushLayer<AppLayer>();
+	app->PushLayer(AppLayer());
+	//app->PushLayer<AppLayer>();
 	app->SetMenubarCallback([app]()
 	{
 		if (ImGui::BeginMenu("File"))

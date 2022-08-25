@@ -15,14 +15,14 @@ namespace CF {
 		enum class ContextAPI
 		{
 			None = 0,
-#if defined(LOAD_SDL)
+#if LOAD_SDL
 			SDLOpenGL,
 #endif
 			GLFWOpenGL,
-#if defined(LOAD_VULKAN)
+#if LOAD_VULKAN
 			GLFWVulkan,
 #endif
-#if defined(PLATFORM_WINDOWS) && defined(EXPERIMENTAL)
+#if defined(PLATFORM_WINDOWS) && EXPERIMENTAL
 			WIN32DX12,
 #endif
 		};
@@ -54,9 +54,11 @@ namespace CF {
 			return layer;
 		}
 
-		virtual Layer* PushLayer(Layer&& layer)
+		template<typename T>
+		Layer* PushLayer(T&& layer)
 		{
-			Layer* Tlayer = m_LayerStack.emplace_back(std::make_unique<Layer>(layer)).get();
+			static_assert(std::is_base_of<Layer, T>::value, "Pushed type is not subclass of Layer!");
+			Layer* Tlayer = m_LayerStack.emplace_back(std::make_unique<T>(layer)).get();
 			Tlayer->OnAttach();
 			return Tlayer;
 		}
