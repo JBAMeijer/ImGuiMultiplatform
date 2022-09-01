@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include <GLFW/glfw3.h>
-
-#define GL_CLAMP_TO_EDGE 0x812F
+#include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -18,7 +16,10 @@ namespace CF
 		int image_heigth = 0;
 		unsigned char* imageDataTemp = stbi_load(path.c_str(), &image_width, &image_heigth, nullptr, 4);
 		if (imageDataTemp == nullptr)
+		{
+			assert(0 && "Image could not be loaded! Assertion thrown.");
 			return {};
+		}
 
 		GLuint imageTexture = 0;
 

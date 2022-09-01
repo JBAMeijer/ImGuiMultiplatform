@@ -53,8 +53,7 @@ namespace CF
 			s_ImageIO = std::make_unique<OpenGLImageIO>();
 			break;
 		default:
-			assert(0);
-			std::cout << "Unknown Context\n";
+			assert(0 && "Unknown Context");
 			break;
 		}
 	}

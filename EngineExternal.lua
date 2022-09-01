@@ -6,6 +6,7 @@ SDL2_SDK   = os.getenv("SDL2_SDK")
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"]  	  = "vendor/glfw/include"
+IncludeDir["Glad"]  	  = "Vendor/glad/include"
 IncludeDir["ImGui"] 	  = "vendor/imgui"
 IncludeDir["stb_image"]   = "vendor/stb_image"
 IncludeDir["glm"]   	  = "vendor/glm"
@@ -19,6 +20,7 @@ LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 group "Dependencies"
 	include "vendor/glfw"
 	include "vendor/imgui"
+	include "Vendor/glad"
 group ""
 
 group "Core"
@@ -56,18 +58,25 @@ project "Engine"
 		"%{LibraryDir.VulkanSDK}"
 	}
 
+	defines
+	{
+		"GLFW_INCLUDE_NONE",
+		"LOAD_VULKAN",
+		"LOAD_SDL"
+	}
+
 	if not VULKAN_SDK then
 		removeincludedirs "%{IncludeDir.VulkanSDK}"
 		removelibdirs "%{LibraryDir.VulkanSDK}"
 		removefiles { "**/GLFWVulkan/**" }
-		defines "REMOVE_VULKAN"
+		removedefines "LOAD_VULKAN"
 	end
 
 	if not SDL2_SDK then
 		removeincludedirs "%{IncludeDir.SDL2SDK}"
 		removelibdirs "%{LibraryDir.SDL2SDKx64}"
 		removefiles { "**/SDLOpenGL/**" }
-		defines "REMOVE_SDL"
+		removedefines "LOAD_SDL"
 	end
 
 	filter "system:windows"
@@ -79,6 +88,7 @@ project "Engine"
 		links
 		{
 			"GLFW",
+			"Glad",
 			"ImGui",
 			"SDL2.lib",
 			"SDL2main.lib",

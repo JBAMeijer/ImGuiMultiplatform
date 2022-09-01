@@ -8,7 +8,6 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-
 #include <stdio.h>
 
 //#define IMGUI_IMPL_OPENGL_ES2
@@ -16,6 +15,8 @@
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h>
+
+#include <glad/glad.h>
 
 #include "ImGui/Fonts/Roboto-Regular.embed"
 
@@ -130,6 +131,8 @@ namespace CF {
             return;
 
         glfwMakeContextCurrent(m_WindowHandle);
+        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        assert(status && "Failed to initialize Glad");
         glfwSwapInterval(1); // Enalbe vsync
 
         // Setup Dear ImGui context

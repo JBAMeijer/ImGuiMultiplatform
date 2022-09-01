@@ -1,10 +1,9 @@
 .vs/
 
-/bin-int/
-/bin/
+**/bin-int/
+**/bin/
 
 !/vendor/bin/premake/
-
 
 # Visual studio files and folders
 .vs/

@@ -1,6 +1,6 @@
 workspace "GUIAPP"
 	architecture "x86_64"
-	startproject "Client"
+	startproject "TestClient"
 
 	configurations 
 	{
@@ -16,10 +16,11 @@ SDL2_SDK   = os.getenv("SDL2_SDK")
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"]  	  = "vendor/glfw/include"
-IncludeDir["ImGui"] 	  = "vendor/imgui"
-IncludeDir["stb_image"]   = "vendor/stb_image"
-IncludeDir["glm"]   	  = "vendor/glm"
+IncludeDir["GLFW"]  	  = "Vendor/glfw/include"
+IncludeDir["Glad"]  	  = "Vendor/glad/include"
+IncludeDir["ImGui"] 	  = "Vendor/imgui"
+IncludeDir["stb_image"]   = "Vendor/stb_image"
+IncludeDir["glm"]   	  = "Vendor/glm"
 IncludeDir["SDL2SDK"]     = "%{SDL2_SDK}/include"
 IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/include"
 
@@ -28,8 +29,9 @@ LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/lib/x64"
 LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 
 group "Dependencies"
-	include "vendor/glfw"
-	include "vendor/imgui"
+	include "Vendor/glfw"
+	include "Vendor/imgui"
+	include "Vendor/glad"
 group ""
 
 group "Core"
@@ -47,13 +49,14 @@ project "Engine"
 	{
 		"%{prj.name}/src/**.h", 
 		"%{prj.name}/src/**.cpp",
-		"vendor/stb_image/stb_image.h",
+		"vendor/stb_image/stb_image.h"
 	}
 
 	includedirs 
 	{
 		"%{prj.name}/src",
 		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
@@ -69,6 +72,7 @@ project "Engine"
 
 	defines
 	{
+		"GLFW_INCLUDE_NONE",
 		"LOAD_VULKAN",
 		"LOAD_SDL"
 	}
@@ -96,6 +100,7 @@ project "Engine"
 		links
 		{
 			"GLFW",
+			"Glad",
 			"ImGui",
 			"SDL2.lib",
 			"SDL2main.lib",
@@ -134,11 +139,12 @@ project "Engine"
 		defines "CF_DIST"
 		runtime "Release"
 		optimize "on"
+		symbols "off"
 group ""
 
 group "APP"
-project "Client"
-	location "Client"
+project "TestClient"
+	location "TestClient"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
@@ -157,8 +163,6 @@ project "Client"
 	{
 		"Engine/src",
 		"vendor/imgui",
-		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.glm}"
 	}
