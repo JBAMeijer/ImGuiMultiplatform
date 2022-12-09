@@ -1,25 +1,22 @@
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-SDL2_SDK   = os.getenv("SDL2_SDK")
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"]  	  = "vendor/glfw/include"
+IncludeDir["GLFW"]  	  = "Vendor/glfw/include"
 IncludeDir["Glad"]  	  = "Vendor/glad/include"
-IncludeDir["ImGui"] 	  = "vendor/imgui"
-IncludeDir["stb_image"]   = "vendor/stb_image"
-IncludeDir["glm"]   	  = "vendor/glm"
-IncludeDir["SDL2SDK"]     = "%{SDL2_SDK}/include"
+IncludeDir["ImGui"] 	  = "Vendor/imgui"
+IncludeDir["stb_image"]   = "Vendor/stb_image"
+IncludeDir["glm"]   	  = "Vendor/glm"
 IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/include"
 
 LibraryDir = {}
-LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/lib/x64"
 LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 
 group "Dependencies"
-	include "vendor/glfw"
-	include "vendor/imgui"
+	include "Vendor/glfw"
+	include "Vendor/imgui"
 	include "Vendor/glad"
 group ""
 
@@ -38,23 +35,22 @@ project "Engine"
 	{
 		"%{prj.name}/src/**.h", 
 		"%{prj.name}/src/**.cpp",
-		"vendor/stb_image/stb_image.h",
+		"vendor/stb_image/stb_image.h"
 	}
 
 	includedirs 
 	{
 		"%{prj.name}/src",
 		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
 	libdirs
 	{
-		"%{LibraryDir.SDL2SDKx64}",
 		"%{LibraryDir.VulkanSDK}"
 	}
 
@@ -62,7 +58,6 @@ project "Engine"
 	{
 		"GLFW_INCLUDE_NONE",
 		"LOAD_VULKAN",
-		"LOAD_SDL"
 	}
 
 	if not VULKAN_SDK then
@@ -70,13 +65,6 @@ project "Engine"
 		removelibdirs "%{LibraryDir.VulkanSDK}"
 		removefiles { "**/GLFWVulkan/**" }
 		removedefines "LOAD_VULKAN"
-	end
-
-	if not SDL2_SDK then
-		removeincludedirs "%{IncludeDir.SDL2SDK}"
-		removelibdirs "%{LibraryDir.SDL2SDKx64}"
-		removefiles { "**/SDLOpenGL/**" }
-		removedefines "LOAD_SDL"
 	end
 
 	filter "system:windows"
@@ -90,43 +78,32 @@ project "Engine"
 			"GLFW",
 			"Glad",
 			"ImGui",
-			"SDL2.lib",
-			"SDL2main.lib",
 			"opengl32.lib",
 			"vulkan-1.lib",
-			"d3d12.lib",
-			"d3dcompiler.lib",
-			"dxgi.lib"
 		}
 
 		if not VULKAN_SDK then
 			removelinks "vulkan-1.lib"
 		end
 
-		if not SDL2_SDK then
-			removelinks { "SDL2.lib", "SDL2main.lib" }
-		end
-
 		systemversion "latest"
 
 	filter "system:linux"
-		removefiles { "**/WIN32DX12/**" }
 		systemversion "latest"
 	
 	filter "configurations:Debug"
 		defines "CF_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "CF_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "CF_DIST"
 		runtime "Release"
-		optimize "On"
-		symbols "Off"
-
+		optimize "on"
+		symbols "off"
 group ""

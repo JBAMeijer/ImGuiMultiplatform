@@ -2,15 +2,9 @@
 #include "imgui.h"
 
 #include "PlatformSpecific/None/None.h"
-#if LOAD_SDL
-#include "PlatformSpecific/SDLOpenGL/SDLOpenGL.h"
-#endif
 #include "PlatformSpecific/GLFWOpenGL/GLFWOpenGL.h"
 #if LOAD_VULKAN
 #include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
-#endif
-#if defined(PLATFORM_WINDOWS) && EXPERIMENTAL
-#include "PlatformSpecific/WIN32DX12/WIN32DX12.h"
 #endif
 
 namespace CF {
@@ -20,15 +14,9 @@ namespace CF {
 		switch (api)
 		{
 		case ContextAPI::None: return new None(spec);
-#if LOAD_SDL
-		case ContextAPI::SDLOpenGL: return new SDLOpenGL(spec);
-#endif
 		case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
 #if LOAD_VULKAN
 		case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
-#endif
-#if defined(PLATFORM_WINDOWS) && EXPERIMENTAL
-		case ContextAPI::WIN32DX12: return new WIN32DX12(spec);
 #endif
 		}
 

@@ -12,7 +12,6 @@ workspace "GUIAPP"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-SDL2_SDK   = os.getenv("SDL2_SDK")
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
@@ -21,11 +20,9 @@ IncludeDir["Glad"]  	  = "Vendor/glad/include"
 IncludeDir["ImGui"] 	  = "Vendor/imgui"
 IncludeDir["stb_image"]   = "Vendor/stb_image"
 IncludeDir["glm"]   	  = "Vendor/glm"
-IncludeDir["SDL2SDK"]     = "%{SDL2_SDK}/include"
 IncludeDir["VulkanSDK"]   = "%{VULKAN_SDK}/include"
 
 LibraryDir = {}
-LibraryDir["SDL2SDKx64"] 	= "%{SDL2_SDK}/lib/x64"
 LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 
 group "Dependencies"
@@ -60,13 +57,11 @@ project "Engine"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
 	libdirs
 	{
-		"%{LibraryDir.SDL2SDKx64}",
 		"%{LibraryDir.VulkanSDK}"
 	}
 
@@ -74,7 +69,6 @@ project "Engine"
 	{
 		"GLFW_INCLUDE_NONE",
 		"LOAD_VULKAN",
-		"LOAD_SDL"
 	}
 
 	if not VULKAN_SDK then
@@ -82,13 +76,6 @@ project "Engine"
 		removelibdirs "%{LibraryDir.VulkanSDK}"
 		removefiles { "**/GLFWVulkan/**" }
 		removedefines "LOAD_VULKAN"
-	end
-
-	if not SDL2_SDK then
-		removeincludedirs "%{IncludeDir.SDL2SDK}"
-		removelibdirs "%{LibraryDir.SDL2SDKx64}"
-		removefiles { "**/SDLOpenGL/**" }
-		removedefines "LOAD_SDL"
 	end
 
 	filter "system:windows"
@@ -102,27 +89,17 @@ project "Engine"
 			"GLFW",
 			"Glad",
 			"ImGui",
-			"SDL2.lib",
-			"SDL2main.lib",
 			"opengl32.lib",
 			"vulkan-1.lib",
-			"d3d12.lib",
-			"d3dcompiler.lib",
-			"dxgi.lib"
 		}
 
 		if not VULKAN_SDK then
 			removelinks "vulkan-1.lib"
 		end
 
-		if not SDL2_SDK then
-			removelinks { "SDL2.lib", "SDL2main.lib" }
-		end
-
 		systemversion "latest"
 
 	filter "system:linux"
-		removefiles { "**/WIN32DX12/**" }
 		systemversion "latest"
 	
 	filter "configurations:Debug"
@@ -163,7 +140,6 @@ project "TestClient"
 	{
 		"Engine/src",
 		"vendor/imgui",
-		"%{IncludeDir.SDL2SDK}",
 		"%{IncludeDir.glm}"
 	}
 
@@ -189,7 +165,6 @@ project "TestClient"
 			"GL",
 			"GLFW",
 			"ImGui",
-			"SDL2",
 			"vulkan"
 		}
 

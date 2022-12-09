@@ -1,9 +1,6 @@
 #pragma once
 
 //OpenGL	: ImTextureID = GLuint
-//DirectX9  : ImTextureID = LPDIRECT3DTEXTURE9
-//DirectX11 : ImTextureID = ID3D11ShaderResourceView* 
-//DirectX12 : ImTextureID = D3D12_GPU_DESCRIPTOR_HANDLE
 //Vulkan	: ImTextureID = 
 
 #include <string>

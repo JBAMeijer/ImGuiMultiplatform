@@ -15,15 +15,9 @@ namespace CF {
 		enum class ContextAPI
 		{
 			None = 0,
-#if LOAD_SDL
-			SDLOpenGL,
-#endif
 			GLFWOpenGL,
 #if LOAD_VULKAN
 			GLFWVulkan,
-#endif
-#if defined(PLATFORM_WINDOWS) && EXPERIMENTAL
-			WIN32DX12,
 #endif
 		};
 
