@@ -2,7 +2,6 @@
 #include "imgui.h"
 
 #include "PlatformSpecific/None/None.h"
-#include "PlatformSpecific/GLFWOpenGL/GLFWOpenGL.h"
 #if LOAD_VULKAN
 #include "PlatformSpecific/GLFWVulkan/GLFWVulkan.h"
 #endif
@@ -14,7 +13,6 @@ namespace CF {
 		switch (api)
 		{
 		case ContextAPI::None: return new None(spec);
-		case ContextAPI::GLFWOpenGL: return new GLFWOpenGL(spec);
 #if LOAD_VULKAN
 		case ContextAPI::GLFWVulkan: return new GLFWVulkan(spec);
 #endif

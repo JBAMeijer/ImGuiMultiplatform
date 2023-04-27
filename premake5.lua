@@ -16,7 +16,6 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"]  	  = "Vendor/glfw/include"
-IncludeDir["Glad"]  	  = "Vendor/glad/include"
 IncludeDir["ImGui"] 	  = "Vendor/imgui"
 IncludeDir["stb_image"]   = "Vendor/stb_image"
 IncludeDir["glm"]   	  = "Vendor/glm"
@@ -28,7 +27,6 @@ LibraryDir["VulkanSDK"] 	= "%{VULKAN_SDK}/lib"
 group "Dependencies"
 	include "Vendor/glfw"
 	include "Vendor/imgui"
-	include "Vendor/glad"
 group ""
 
 group "Core"
@@ -42,6 +40,10 @@ project "Engine"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	if not VULKAN_SDK then
+		error("Vulkan not installed on this system")
+	end
+
 	files 
 	{
 		"%{prj.name}/src/**.h", 
@@ -53,7 +55,6 @@ project "Engine"
 	{
 		"%{prj.name}/src",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
@@ -68,15 +69,7 @@ project "Engine"
 	defines
 	{
 		"GLFW_INCLUDE_NONE",
-		"LOAD_VULKAN",
 	}
-
-	if not VULKAN_SDK then
-		removeincludedirs "%{IncludeDir.VulkanSDK}"
-		removelibdirs "%{LibraryDir.VulkanSDK}"
-		removefiles { "**/GLFWVulkan/**" }
-		removedefines "LOAD_VULKAN"
-	end
 
 	filter "system:windows"
 		defines 
@@ -87,15 +80,9 @@ project "Engine"
 		links
 		{
 			"GLFW",
-			"Glad",
 			"ImGui",
-			"opengl32.lib",
 			"vulkan-1.lib",
 		}
-
-		if not VULKAN_SDK then
-			removelinks "vulkan-1.lib"
-		end
 
 		systemversion "latest"
 
@@ -162,7 +149,6 @@ project "TestClient"
 		{
 			"dl",
 			"pthread",
-			"GL",
 			"GLFW",
 			"ImGui",
 			"vulkan"
